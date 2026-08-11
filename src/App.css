@@ -1,3 +1,34 @@
 #root {
   min-height: 100vh;
 }
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  background-color: #163b4d;
+  color: white;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.main-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.main-nav a {
+  color: white;
+}
+
+.main-nav a.active {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+main {
+  padding: 32px;
+}

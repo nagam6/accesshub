@@ -1,94 +1,68 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import AppLayout from './layouts/AppLayout'
+import Home from './pages/Home'
+import ExplorePlaces from './pages/ExplorePlaces'
+import PlaceDetails from './pages/PlaceDetails'
+import SuggestPlace from './pages/SuggestPlace'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import Favorites from './pages/Favorites'
+import Profile from './pages/Profile'
+import AdminDashboard from './pages/AdminDashboard'
+import NotFound from './pages/NotFound'
 import './App.css'
-
-function Home() {
-  return <h1>AccessHub</h1>
-}
-
-function ExplorePlaces() {
-  return <h1>Explore Places</h1>
-}
-
-function PlaceDetails() {
-  return <h1>Place Details</h1>
-}
-
-function SuggestPlace() {
-  return <h1>Suggest a Place</h1>
-}
-
-function Login() {
-  return <h1>Login</h1>
-}
-
-function Register() {
-  return <h1>Register</h1>
-}
-
-function ForgotPassword() {
-  return <h1>Forgot Password</h1>
-}
-
-function Favorites() {
-  return <h1>Favorites</h1>
-}
-
-function Profile() {
-  return <h1>Profile</h1>
-}
-
-function AdminDashboard() {
-  return <h1>Admin Dashboard</h1>
-}
-
-function NotFound() {
-  return <h1>404 - Page Not Found</h1>
-}
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
-  },
-  {
-    path: '/places',
-    element: <ExplorePlaces />,
-  },
-  {
-    path: '/places/:id',
-    element: <PlaceDetails />,
-  },
-  {
-    path: '/suggest-place',
-    element: <SuggestPlace />,
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
-  {
-    path: '/forgot-password',
-    element: <ForgotPassword />,
-  },
-  {
-    path: '/favorites',
-    element: <Favorites />,
-  },
-  {
-    path: '/profile',
-    element: <Profile />,
-  },
-  {
-    path: '/admin',
-    element: <AdminDashboard />,
-  },
-  {
-    path: '*',
-    element: <NotFound />,
+    element: <AppLayout />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: 'places',
+        element: <ExplorePlaces />,
+      },
+      {
+        path: 'places/:id',
+        element: <PlaceDetails />,
+      },
+      {
+        path: 'suggest-place',
+        element: <SuggestPlace />,
+      },
+      {
+        path: 'login',
+        element: <Login />,
+      },
+      {
+        path: 'register',
+        element: <Register />,
+      },
+      {
+        path: 'forgot-password',
+        element: <ForgotPassword />,
+      },
+      {
+        path: 'favorites',
+        element: <Favorites />,
+      },
+      {
+        path: 'profile',
+        element: <Profile />,
+      },
+      {
+        path: 'admin',
+        element: <AdminDashboard />,
+      },
+      {
+        path: '*',
+        element: <NotFound />,
+      },
+    ],
   },
 ])
 
