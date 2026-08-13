@@ -8,6 +8,7 @@ import {
   Heart,
   UserRound
 } from 'lucide-react'
+import './Header.css'
 
 function Header() {
   return (

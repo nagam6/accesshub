@@ -1,0 +1,185 @@
+.site-header {
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e7eeee;
+}
+
+.header-container {
+  width: 100%;
+  max-width: 1550px;
+  min-height: 94px;
+
+  margin: 0 auto;
+  padding: 0 38px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 40px;
+}
+
+/* Logo */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  text-decoration: none;
+}
+
+.brand-icon {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background-color: #08777c;
+  color: #ffffff;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  color: #07636a;
+
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.brand-tagline {
+  margin-top: 5px;
+
+  color: #6d7c80;
+
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+
+/* Navigation */
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 13px 15px;
+
+  border-radius: 18px;
+
+  color: #252d30;
+  text-decoration: none;
+
+  font-size: 0.96rem;
+  font-weight: 500;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Hover - NO underline */
+
+.nav-link:hover {
+  background-color: #f0f6f6;
+  color: #08777c;
+}
+
+/* Current page */
+
+.nav-link.active {
+  background-color: #e5f0f0;
+  color: #08777c;
+}
+
+/* Important: remove old underline */
+
+.nav-link::after,
+.nav-link.active::after {
+  display: none;
+}
+
+/* Login */
+
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 14px 22px;
+
+  border-radius: 15px;
+
+  background-color: #006c72;
+  color: #ffffff;
+
+  text-decoration: none;
+  font-weight: 700;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.login-button:hover {
+  background-color: #005c61;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+
+@media (max-width: 1050px) {
+  .header-container {
+    grid-template-columns: auto auto;
+  }
+
+  .main-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+
+    padding-bottom: 14px;
+
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-container {
+    padding: 14px 18px;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .login-button span {
+    display: none;
+  }
+
+  .login-button {
+    padding: 13px;
+  }
+
+  .nav-link {
+    white-space: nowrap;
+  }
+}

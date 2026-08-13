@@ -1,0 +1,95 @@
+.explore-page {
+  min-height: 100vh;
+  padding: 70px 32px 90px;
+  background-color: #f5f8f8;
+}
+
+.explore-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.explore-heading {
+  max-width: 760px;
+  margin-bottom: 38px;
+}
+
+.explore-heading h1 {
+  margin: 6px 0 12px;
+
+  color: #102f3e;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.4rem, 4vw, 3.7rem);
+}
+
+.explore-heading p {
+  margin: 0;
+
+  color: #66777c;
+
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.explore-toolbar {
+  display: flex;
+  gap: 14px;
+
+  margin-bottom: 28px;
+}
+
+.explore-search {
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 0 18px;
+
+  border: 1px solid #dbe4e4;
+  border-radius: 14px;
+
+  background-color: #ffffff;
+  color: #6b7b80;
+}
+
+.explore-search input {
+  width: 100%;
+
+  padding: 16px 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+  font: inherit;
+}
+
+.filters-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 0 22px;
+
+  border: 1px solid #08777c;
+  border-radius: 14px;
+
+  background-color: #ffffff;
+  color: #08777c;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.results-header {
+  margin-bottom: 18px;
+
+  color: #596b70;
+}
+
+.results-header p {
+  margin: 0;
+}

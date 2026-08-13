@@ -5,6 +5,8 @@ import {
   BadgeCheck,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import './PlaceCard.css'
+
 
 function PlaceCard({ place }) {
   return (

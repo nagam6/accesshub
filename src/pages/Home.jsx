@@ -17,6 +17,8 @@ import places from '../data/places'
 import PlaceCard from '../components/PlaceCard'
 import { Link } from 'react-router-dom'
 
+import './Home.css'
+
 function Home() {
   return (
     <>

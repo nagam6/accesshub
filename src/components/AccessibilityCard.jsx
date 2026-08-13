@@ -1,3 +1,4 @@
+import './AccessibilityCard.css'
 function AccessibilityCard({ icon: Icon, title, description }) {
   return (
     <article className="accessibility-card">
