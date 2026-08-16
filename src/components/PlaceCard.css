@@ -106,12 +106,20 @@
 
   background-color: #ffffff;
   color: #37474d;
-
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   cursor: pointer;
 }
 
 .favorite-button:hover {
-  color: #ff6f5a;
+  color: #e63946;
+  transform: scale(1.08);
+}
+
+.favorite-button:hover svg {
+  fill: #e63946;
+  stroke: #e63946;
 }
 
 .place-card-content {

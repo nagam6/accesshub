@@ -4,17 +4,21 @@ import {
   Heart,
   BadgeCheck,
 } from 'lucide-react'
+
 import { Link } from 'react-router-dom'
 import './PlaceCard.css'
 
-
 function PlaceCard({ place }) {
+  const accessibilityCount = Object.values(place.accessibility)
+    .flat()
+    .length
+
   return (
     <article className="place-card">
 
       <div className="place-image-wrapper">
         <img
-          src={place.image}
+          src={place.images[0]}
           alt={place.name}
           className="place-image"
         />
@@ -27,6 +31,7 @@ function PlaceCard({ place }) {
         )}
 
         <button
+          type="button"
           className="favorite-button"
           aria-label={`Save ${place.name} to favorites`}
         >
@@ -54,7 +59,7 @@ function PlaceCard({ place }) {
         </div>
 
         <div className="place-accessibility-summary">
-          {place.accessibility.length} accessibility features
+          {accessibilityCount} accessibility features
         </div>
 
         <Link
