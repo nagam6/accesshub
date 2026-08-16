@@ -1,5 +1,219 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  Accessibility,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Shield
+} from 'lucide-react'
+
+import './Login.css'
+
 function Login() {
-  return <h1>Login</h1>
+  const navigate = useNavigate()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+  const [message, setMessage] = useState('')
+
+  function handleSubmit(event) {
+    event.preventDefault()
+
+    if (!email.trim() || !password.trim()) {
+      setMessage('Please enter your email and password.')
+      return
+    }
+
+    setMessage('Login successful.')
+  }
+
+  function handleGuest() {
+    navigate('/explore')
+  }
+
+  return (
+    <main className="login-page">
+
+      {/* HEADER */}
+
+      <div className="login-header">
+
+        <div className="login-logo-icon">
+          <Accessibility size={28} />
+        </div>
+
+        <h1>Welcome Back</h1>
+
+        <p>
+          Log in to access your favorites and preferences.
+        </p>
+
+      </div>
+
+      {/* LOGIN CARD */}
+
+      <div className="login-card">
+
+        {message && (
+          <div className="login-message">
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+
+          {/* EMAIL */}
+
+          <div className="login-field">
+            <label htmlFor="email">
+              Email
+            </label>
+
+            <div className="login-input-wrapper">
+              <Mail size={18} />
+
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                placeholder="you@example.com"
+              />
+            </div>
+          </div>
+
+          {/* PASSWORD */}
+
+          <div className="login-field">
+            <label htmlFor="password">
+              Password
+            </label>
+
+            <div className="login-input-wrapper">
+
+              <Lock size={18} />
+
+              <input
+                id="password"
+                type={
+                  showPassword
+                    ? 'text'
+                    : 'password'
+                }
+                value={password}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
+                placeholder="••••••••"
+              />
+
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() =>
+                  setShowPassword(
+                    (current) => !current
+                  )
+                }
+                aria-label={
+                  showPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                }
+              >
+                {showPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
+              </button>
+
+            </div>
+          </div>
+
+          {/* OPTIONS */}
+
+          <div className="login-options">
+
+            <label className="remember-option">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) =>
+                  setRememberMe(
+                    event.target.checked
+                  )
+                }
+              />
+
+              <span>Remember me</span>
+            </label>
+
+            <Link to="/forgot-password">
+              Forgot password?
+            </Link>
+
+          </div>
+
+          {/* LOGIN */}
+
+          <button
+            type="submit"
+            className="login-button"
+          >
+            Log In
+          </button>
+
+        </form>
+
+        {/* DIVIDER */}
+
+        <div className="login-divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
+        </div>
+
+        {/* GUEST */}
+
+        <button
+          type="button"
+          className="guest-button"
+          onClick={handleGuest}
+        >
+          Continue as Guest
+        </button>
+
+      </div>
+
+      {/* SIGN UP */}
+
+      <p className="login-signup">
+        Don't have an account?{' '}
+
+        <Link to="/register">
+          Sign up
+        </Link>
+      </p>
+
+      {/* ADMIN */}
+
+      <Link
+        to="/admin-login"
+        className="admin-login-link"
+      >
+        <Shield size={16} />
+        Admin Login
+      </Link>
+
+    </main>
+  )
 }
 
-export default Login;
+export default Login
