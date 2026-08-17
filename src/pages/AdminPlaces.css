@@ -1,0 +1,389 @@
+.admin-places-page {
+  min-height: 100vh;
+  padding: 45px 32px 90px;
+
+  background-color: #f5f8f8;
+}
+
+.admin-places-container {
+  max-width: 1250px;
+  margin: 0 auto;
+}
+
+/* BACK */
+
+.admin-back-link {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 28px;
+
+  color: #526a70;
+
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.admin-back-link:hover {
+  color: #08777c;
+}
+
+/* HEADING */
+
+.admin-places-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 30px;
+
+  margin-bottom: 30px;
+}
+
+.admin-places-heading h1 {
+  margin: 7px 0 10px;
+
+  color: #102f3e;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.3rem, 4vw, 3.4rem);
+}
+
+.admin-places-heading p {
+  margin: 0;
+
+  color: #687b80;
+}
+
+.admin-add-place-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 13px 18px;
+
+  border-radius: 12px;
+
+  background-color: #08777c;
+  color: #ffffff;
+
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.admin-add-place-button:hover {
+  background-color: #06686c;
+}
+
+/* TOOLBAR */
+
+.admin-places-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+.admin-places-search {
+  width: min(480px, 100%);
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 0 15px;
+
+  border: 1px solid #d7e1e1;
+  border-radius: 13px;
+
+  background-color: #ffffff;
+
+  color: #687c81;
+}
+
+.admin-places-search:focus-within {
+  border-color: #08777c;
+
+  box-shadow:
+    0 0 0 3px rgba(8, 119, 124, 0.08);
+}
+
+.admin-places-search input {
+  width: 100%;
+
+  padding: 13px 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font: inherit;
+  color: #173843;
+}
+
+.admin-places-search input::placeholder {
+  color: #9aa8ac;
+}
+
+.admin-places-count {
+  color: #667b80;
+
+  font-size: 0.9rem;
+}
+
+/* CARD */
+
+.admin-places-card {
+  overflow: hidden;
+
+  border: 1px solid #dce5e5;
+  border-radius: 18px;
+
+  background-color: #ffffff;
+}
+
+.admin-places-table-wrapper {
+  overflow-x: auto;
+}
+
+/* TABLE */
+
+.admin-places-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.admin-places-table th,
+.admin-places-table td {
+  padding: 16px 18px;
+
+  border-bottom: 1px solid #edf1f1;
+
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-places-table th {
+  background-color: #f8fafa;
+
+  color: #697b80;
+
+  font-size: 0.76rem;
+  font-weight: 800;
+
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-places-table td {
+  color: #53696f;
+
+  font-size: 0.9rem;
+}
+
+.admin-places-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-places-table tbody tr:hover {
+  background-color: #fbfdfd;
+}
+
+/* PLACE */
+
+.admin-place-info {
+  min-width: 210px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.admin-place-info img {
+  width: 55px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  object-fit: cover;
+
+  background-color: #edf1f1;
+}
+
+.admin-place-info > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.admin-place-info strong {
+  color: #173843;
+}
+
+.admin-place-info span {
+  color: #87969a;
+
+  font-size: 0.76rem;
+}
+
+/* LOCATION */
+
+.admin-location-cell {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  white-space: nowrap;
+}
+
+.admin-location-cell svg {
+  color: #08777c;
+}
+
+/* STATUS */
+
+.admin-place-status {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  white-space: nowrap;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.admin-place-status.verified {
+  background-color: #dff3ec;
+  color: #226d5e;
+}
+
+.admin-place-status.pending {
+  background-color: #fff0dc;
+  color: #97611c;
+}
+
+/* ACTIONS */
+
+.admin-place-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.admin-icon-button {
+  width: 35px;
+  height: 35px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #dce5e5;
+  border-radius: 9px;
+
+  background-color: #ffffff;
+  color: #526b71;
+
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.admin-icon-button:hover {
+  border-color: #08777c;
+
+  color: #08777c;
+}
+
+.admin-icon-button.verify:hover {
+  border-color: #3a8b70;
+
+  background-color: #edf8f4;
+  color: #287259;
+}
+
+.admin-icon-button.delete:hover {
+  border-color: #df8d8d;
+
+  background-color: #fff3f3;
+  color: #c44747;
+}
+
+/* EMPTY */
+
+.admin-places-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  padding: 65px 25px;
+
+  text-align: center;
+}
+
+.admin-places-empty svg {
+  color: #08777c;
+}
+
+.admin-places-empty h3 {
+  margin: 13px 0 7px;
+
+  color: #173843;
+}
+
+.admin-places-empty p {
+  margin: 0;
+
+  color: #73858a;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 750px) {
+  .admin-places-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-places-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-add-place-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 550px) {
+  .admin-places-page {
+    padding: 32px 18px 65px;
+  }
+}

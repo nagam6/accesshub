@@ -10,6 +10,8 @@ import ForgotPassword from './pages/ForgotPassword'
 import Favorites from './pages/Favorites'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminPlaces from './pages/AdminPlaces'
+import AdminPlaceForm from './pages/AdminPlaceForm'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
 import './App.css'
@@ -62,6 +64,14 @@ const router = createBrowserRouter([
       {
         path: 'admin',
         element: <AdminDashboard />,
+      },
+      {
+        path: 'admin/places',
+        element: <AdminPlaces />,
+      },
+           {
+        path: 'admin/places/new',
+        element: <AdminPlaceForm />,
       },
       {
         path: '*',
