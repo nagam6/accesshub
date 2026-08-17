@@ -7,9 +7,14 @@ import {
 
 import { Link } from 'react-router-dom'
 import './PlaceCard.css'
+import { useFavorites } from '../context/FavoritesContext'
 
 function PlaceCard({ place }) {
-  const accessibilityCount = Object.values(place.accessibility)
+
+  const { toggleFavorite, isFavorite } = useFavorites()
+  const favorite = isFavorite(place.id)
+
+    const accessibilityCount = Object.values(place.accessibility)
     .flat()
     .length
 
@@ -30,13 +35,23 @@ function PlaceCard({ place }) {
           </span>
         )}
 
-        <button
-          type="button"
-          className="favorite-button"
-          aria-label={`Save ${place.name} to favorites`}
-        >
-          <Heart size={20} />
-        </button>
+          <button
+  type="button"
+  className={`favorite-button ${
+    favorite ? 'favorite-button-active' : ''
+  }`}
+  onClick={() => toggleFavorite(place)}
+  aria-label={
+    favorite
+      ? `Remove ${place.name} from favorites`
+      : `Save ${place.name} to favorites`
+  }
+>
+  <Heart
+    size={20}
+    fill={favorite ? 'currentColor' : 'none'}
+  />
+</button>
       </div>
 
       <div className="place-card-content">

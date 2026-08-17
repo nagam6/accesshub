@@ -61,10 +61,15 @@ function Header() {
             <span>Suggest a Place</span>
           </NavLink>
 
-          <a href="#about" className="nav-link">
-            <CircleHelp size={19} />
-            <span>About</span>
-          </a>
+     <NavLink
+  to="/about"
+  className={({ isActive }) =>
+    isActive ? 'nav-link active' : 'nav-link'
+  }
+>
+  <CircleHelp size={19} />
+  <span>About</span>
+</NavLink>
 
           <NavLink
             to="/favorites"

@@ -26,14 +26,16 @@ import {
 import places from '../data/places'
 import reviews from '../data/reviews'
 import ReviewCard from '../components/ReviewCard'
+import { useFavorites } from '../context/FavoritesContext'
 
 import './PlaceDetails.css'
 
 function PlaceDetails() {
   const { id } = useParams()
 
+  const { toggleFavorite, isFavorite } = useFavorites()
+
   const [selectedImage, setSelectedImage] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
 
 const [showReviewForm, setShowReviewForm] = useState(false)
 const [showReportForm, setShowReportForm] = useState(false)
@@ -47,6 +49,7 @@ const [reportReason, setReportReason] = useState('')
   const place = places.find(
     (item) => item.id === Number(id)
   )
+  const favorite = place ? isFavorite(place.id) : false
 
   if (!place) {
     return (
@@ -277,32 +280,20 @@ function handleReportInformation(event) {
 
           <div className="place-details-actions">
 
-            <button
-              type="button"
-              className={`details-action-button ${
-                isFavorite
-                  ? 'favorite-active'
-                  : ''
-              }`}
-              onClick={() =>
-                setIsFavorite(
-                  (current) => !current
-                )
-              }
-            >
-              <Heart
-                size={19}
-                fill={
-                  isFavorite
-                    ? 'currentColor'
-                    : 'none'
-                }
-              />
+ <button
+  type="button"
+  className={`details-action-button ${
+    favorite ? 'favorite-active' : ''
+  }`}
+  onClick={() => toggleFavorite(place)}
+>
+  <Heart
+    size={19}
+    fill={favorite ? 'currentColor' : 'none'}
+  />
 
-              {isFavorite
-                ? 'Saved'
-                : 'Save'}
-            </button>
+  {favorite ? 'Saved' : 'Save'}
+</button>
 
             <button
               type="button"

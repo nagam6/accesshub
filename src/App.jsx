@@ -10,6 +10,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import Favorites from './pages/Favorites'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
+import About from './pages/About'
 import NotFound from './pages/NotFound'
 import './App.css'
 
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: 'favorites',
         element: <Favorites />,
+      },
+      {
+        path:'about',
+        element:<About />,
       },
       {
         path: 'profile',

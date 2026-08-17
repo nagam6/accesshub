@@ -213,7 +213,25 @@
 .view-all-link:hover {
   text-decoration: underline;
 }
+.favorite-button {
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
 
+.favorite-button:hover {
+  color: #e63946;
+  transform: scale(1.08);
+}
+
+.favorite-button-active {
+  color: #e63946;
+}
+
+.favorite-button-active:hover {
+  color: #e63946;
+}
 @media (max-width: 950px) {
   .places-grid {
     grid-template-columns: repeat(2, 1fr);

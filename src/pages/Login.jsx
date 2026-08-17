@@ -28,7 +28,7 @@ function Login() {
       return
     }
 
-    setMessage('Login successful.')
+  navigate('/profile')
   }
 
   function handleGuest() {
