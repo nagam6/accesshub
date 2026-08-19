@@ -1,4 +1,15 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import {
+  addDoc,
+  collection
+} from 'firebase/firestore'
+
+import {
+  auth,
+  db
+} from '../firebase/firebase'
 import {
   MapPin,
   Building2,
@@ -10,6 +21,8 @@ import {
 import './SuggestPlace.css'
 
 function SuggestPlace() {
+  const navigate = useNavigate()
+const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     city: '',
@@ -57,21 +70,58 @@ function SuggestPlace() {
     })
   }
 
-  function handleSubmit(event) {
-    event.preventDefault()
+async function handleSubmit(event) {
+  event.preventDefault()
 
-    if (
-      !formData.name.trim() ||
-      !formData.city.trim() ||
-      !formData.category.trim()
-    ) {
-      alert(
-        'Please complete the required fields before submitting.'
-      )
-      return
+  if (
+    !formData.name.trim() ||
+    !formData.city.trim() ||
+    !formData.category.trim()
+  ) {
+    alert(
+      'Please complete the required fields before submitting.'
+    )
+    return
+  }
+
+  if (!auth.currentUser) {
+    navigate('/login')
+    return
+  }
+
+  try {
+    setSubmitting(true)
+
+    const suggestionData = {
+      userId: auth.currentUser.uid,
+
+      userName:
+        auth.currentUser.displayName ||
+        auth.currentUser.email ||
+        'AccessHub User',
+
+      userEmail:
+        auth.currentUser.email || '',
+
+      name: formData.name.trim(),
+      city: formData.city.trim(),
+      category: formData.category,
+      address: formData.address.trim(),
+      description: formData.description.trim(),
+
+      accessibility:
+        formData.accessibility,
+
+      status: 'pending',
+
+      createdAt:
+        new Date().toISOString(),
     }
 
-    console.log('Place suggestion:', formData)
+    await addDoc(
+      collection(db, 'suggestions'),
+      suggestionData
+    )
 
     setSubmitted(true)
 
@@ -83,7 +133,19 @@ function SuggestPlace() {
       description: '',
       accessibility: [],
     })
+  } catch (error) {
+    console.error(
+      'Error submitting suggestion:',
+      error
+    )
+
+    alert(
+      'Could not submit your suggestion. Please try again.'
+    )
+  } finally {
+    setSubmitting(false)
   }
+}
 
   return (
     <main className="suggest-page">
@@ -317,13 +379,17 @@ function SuggestPlace() {
               it becomes official place information.
             </p>
 
-            <button
-              type="submit"
-              className="suggest-submit-button"
-            >
-              <Send size={18} />
-              Submit Suggestion
-            </button>
+           <button
+  type="submit"
+  className="suggest-submit-button"
+  disabled={submitting}
+>
+  <Send size={18} />
+
+  {submitting
+    ? 'Submitting...'
+    : 'Submit Suggestion'}
+</button>
           </div>
 
         </form>

@@ -1,5 +1,20 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  createUserWithEmailAndPassword,
+  updateProfile
+} from 'firebase/auth'
+
+import {
+  doc,
+  setDoc
+} from 'firebase/firestore'
+
+import {
+  auth,
+  db
+} from '../firebase/firebase'
+
 import {
   Accessibility,
   UserRound,
@@ -13,6 +28,7 @@ import {
 import './Register.css'
 
 function Register() {
+const navigate = useNavigate()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -24,6 +40,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -62,26 +79,107 @@ function handlePreferenceChange(preference) {
   })
 }
 
-  function handleSubmit(event) {
-    event.preventDefault()
+async function handleSubmit(event) {
+  event.preventDefault()
+
+  setMessage('')
+
+  if (
+    !formData.fullName.trim() ||
+    !formData.email.trim() ||
+    !formData.password.trim() ||
+    !formData.confirmPassword.trim()
+  ) {
+    setMessage('Please complete all fields.')
+    return
+  }
+
+  if (
+    formData.password !==
+    formData.confirmPassword
+  ) {
+    setMessage('Passwords do not match.')
+    return
+  }
+
+  if (formData.password.length < 6) {
+    setMessage(
+      'Password must be at least 6 characters.'
+    )
+    return
+  }
+
+  try {
+    setLoading(true)
+
+    // 1. Create Firebase Authentication account
+    const userCredential =
+      await createUserWithEmailAndPassword(
+        auth,
+        formData.email.trim(),
+        formData.password
+      )
+
+    const user = userCredential.user
+
+    // 2. Store the name in Firebase Authentication
+    await updateProfile(user, {
+      displayName: formData.fullName.trim(),
+    })
+
+    // 3. Create the Firestore user profile
+    await setDoc(
+      doc(db, 'users', user.uid),
+      {
+        uid: user.uid,
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        role: 'user',
+        accessibilityPreferences:
+          formData.accessibilityPreferences,
+        createdAt: new Date().toISOString(),
+      }
+    )
+
+    setMessage(
+      'Account created successfully!'
+    )
+
+    navigate('/profile')
+  } catch (error) {
+    console.error(
+      'Registration error:',
+      error
+    )
 
     if (
-      !formData.fullName.trim() ||
-      !formData.email.trim() ||
-      !formData.password.trim() ||
-      !formData.confirmPassword.trim()
+      error.code ===
+      'auth/email-already-in-use'
     ) {
-      setMessage('Please complete all fields.')
-      return
+      setMessage(
+        'An account already exists with this email.'
+      )
+    } else if (
+      error.code === 'auth/invalid-email'
+    ) {
+      setMessage(
+        'Please enter a valid email address.'
+      )
+    } else if (
+      error.code === 'auth/weak-password'
+    ) {
+      setMessage(
+        'Please choose a stronger password.'
+      )
+    } else {
+      setMessage(
+        'Could not create your account. Please try again.'
+      )
     }
-
-    if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match.')
-      return
-    }
-
-    setMessage('Account created successfully.')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <main className="register-page">
@@ -272,13 +370,17 @@ function handlePreferenceChange(preference) {
             </span>
           </label>
 
-          <button
-            type="submit"
-            className="register-submit-button"
-          >
-            <UserPlus size={18} />
-            Create Account
-          </button>
+  <button
+  type="submit"
+  className="register-submit-button"
+  disabled={loading}
+>
+  <UserPlus size={18} />
+
+  {loading
+    ? 'Creating Account...'
+    : 'Create Account'}
+</button>
 
         </form>
 

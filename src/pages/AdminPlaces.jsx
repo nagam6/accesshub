@@ -10,36 +10,154 @@ import {
   Trash2
 } from 'lucide-react'
 
-import { useMemo, useState } from 'react'
+import {useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
 
-import places from '../data/places'
+import { db } from '../firebase/firebase'
+
 import './AdminPlaces.css'
 
 function AdminPlaces() {
+
   const [searchTerm, setSearchTerm] = useState('')
+  const [firebasePlaces, setFirebasePlaces] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredPlaces = useMemo(() => {
-    const search = searchTerm.trim().toLowerCase()
-
-    if (!search) {
-      return places
-    }
-
-    return places.filter((place) => {
-      const name = place.name?.toLowerCase() || ''
-      const city = place.city?.toLowerCase() || ''
-      const category = place.category?.toLowerCase() || ''
-      const address = place.address?.toLowerCase() || ''
-
-      return (
-        name.includes(search) ||
-        city.includes(search) ||
-        category.includes(search) ||
-        address.includes(search)
+useEffect(() => {
+  async function fetchPlaces() {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, 'places')
       )
-    })
-  }, [searchTerm])
+
+ const firestorePlaces = querySnapshot.docs.map((document) => ({
+  firestoreId: document.id,
+  ...document.data(),
+}))
+
+      setFirebasePlaces(firestorePlaces)
+    } catch (error) {
+      console.error('Error loading places:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  fetchPlaces()
+}, [])
+
+
+const filteredPlaces = useMemo(() => {
+  const search = searchTerm.trim().toLowerCase()
+
+  if (!search) {
+    return firebasePlaces
+  }
+
+  return firebasePlaces.filter((place) => {
+    const name =
+      place.name?.toLowerCase() || ''
+
+    const city =
+      place.city?.toLowerCase() || ''
+
+    const category =
+      place.category?.toLowerCase() || ''
+
+    const address =
+      place.address?.toLowerCase() || ''
+
+    return (
+      name.includes(search) ||
+      city.includes(search) ||
+      category.includes(search) ||
+      address.includes(search)
+    )
+  })
+}, [searchTerm, firebasePlaces])
+
+
+async function handleDeletePlace(place) {
+  if (place.source !== 'firebase') {
+    alert(
+      'This is a mock place. It will become editable after we move the original places to Firebase.'
+    )
+    return
+  }
+
+  const confirmed = window.confirm(
+    `Are you sure you want to delete "${place.name}"?`
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await deleteDoc(
+      doc(db, 'places', place.id)
+    )
+
+    setFirebasePlaces((currentPlaces) =>
+      currentPlaces.filter(
+        (currentPlace) => currentPlace.id !== place.id
+      )
+    )
+
+    alert('Place deleted successfully.')
+  } catch (error) {
+    console.error('Error deleting place:', error)
+
+    alert('Could not delete the place. Please try again.')
+  }
+}
+
+async function handleToggleVerified(place) {
+  if (place.source !== 'firebase') {
+    alert(
+      'This is a mock place. It will become editable after we move the original places to Firebase.'
+    )
+    return
+  }
+
+  try {
+    const newVerifiedStatus = !place.verified
+
+    await updateDoc(
+      doc(db, 'places', place.id),
+      {
+        verified: newVerifiedStatus,
+      }
+    )
+
+    setFirebasePlaces((currentPlaces) =>
+      currentPlaces.map((currentPlace) =>
+        currentPlace.id === place.id
+          ? {
+              ...currentPlace,
+              verified: newVerifiedStatus,
+            }
+          : currentPlace
+      )
+    )
+  } catch (error) {
+    console.error(
+      'Error updating verification:',
+      error
+    )
+
+    alert(
+      'Could not update the verification status.'
+    )
+  }
+}
 
   return (
     <main className="admin-places-page">
@@ -102,8 +220,11 @@ function AdminPlaces() {
         </section>
 
         <section className="admin-places-card">
-
-          {filteredPlaces.length > 0 ? (
+  {loading ? (
+    <p className="admin-loading-text">
+      Loading places...
+    </p>
+  ) : filteredPlaces.length > 0 ? (
             <div className="admin-places-table-wrapper">
 
               <table className="admin-places-table">
@@ -120,7 +241,7 @@ function AdminPlaces() {
 
                 <tbody>
                   {filteredPlaces.map((place) => (
-                    <tr key={place.id}>
+                    <tr key={place.firebaseId}>
 
                       <td>
                         <div className="admin-place-info">
@@ -207,31 +328,33 @@ function AdminPlaces() {
                             <Pencil size={17} />
                           </Link>
 
-                          <button
-                            type="button"
-                            className="admin-icon-button verify"
-                            aria-label={
-                              place.verified
-                                ? `Unverify ${place.name}`
-                                : `Verify ${place.name}`
-                            }
-                            title={
-                              place.verified
-                                ? 'Unverify'
-                                : 'Verify'
-                            }
-                          >
-                            <BadgeCheck size={17} />
-                          </button>
+                         <button
+  type="button"
+  className="admin-icon-button verify"
+  onClick={() => handleToggleVerified(place)}
+  aria-label={
+    place.verified
+      ? `Unverify ${place.name}`
+      : `Verify ${place.name}`
+  }
+  title={
+    place.verified
+      ? 'Unverify'
+      : 'Verify'
+  }
+>
+  <BadgeCheck size={17} />
+</button>
 
-                          <button
-                            type="button"
-                            className="admin-icon-button delete"
-                            aria-label={`Delete ${place.name}`}
-                            title="Delete place"
-                          >
-                            <Trash2 size={17} />
-                          </button>
+                       <button
+  type="button"
+  className="admin-icon-button delete"
+  onClick={() => handleDeletePlace(place)}
+  aria-label={`Delete ${place.name}`}
+  title="Delete place"
+>
+  <Trash2 size={17} />
+</button>
 
                         </div>
                       </td>

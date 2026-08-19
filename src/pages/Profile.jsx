@@ -1,4 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  signOut,
+  updatePassword
+} from 'firebase/auth'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where
+} from 'firebase/firestore'
+
+import {
+  auth,
+  db
+} from '../firebase/firebase'
 import {
   UserRound,
   Mail,
@@ -15,25 +34,46 @@ import {
 } from 'lucide-react'
 
 import { useFavorites } from '../context/FavoritesContext'
+import { useAuth } from '../context/AuthContext'
 import './Profile.css'
 
 function Profile() {
+  const {
+  user,
+  authLoading,
+  logout
+} = useAuth()
+  const navigate = useNavigate()
+  async function handleLogout() {
+  try {
+await logout()
+    navigate('/login')
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
   const { favorites } = useFavorites()
 
   const [activeTab, setActiveTab] = useState('profile')
   const [isEditing, setIsEditing] = useState(false)
 
-  const [profile, setProfile] = useState({
-    fullName: 'AccessHub User',
-    email: 'user@accesshub.com',
-    accessibilityPreferences: [
-      'Wheelchair user',
-      'Need accessible restroom',
-      'Need quiet environment',
-    ],
-  })
+const [profile, setProfile] = useState({
+  fullName: '',
+  email: '',
+  accessibilityPreferences: [],
+})
 
-  const [draftProfile, setDraftProfile] = useState(profile)
+const [draftProfile, setDraftProfile] = useState({
+  fullName: '',
+  email: '',
+  accessibilityPreferences: [],
+})
+
+const [loadingProfile, setLoadingProfile] =
+  useState(true)
+
+const [profileMessage, setProfileMessage] =
+  useState('')
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -48,33 +88,135 @@ function Profile() {
     'Need dedicated parking',
     'Need quiet environment',
   ]
+const [submissions, setSubmissions] =
+  useState([])
 
-  const submissions = [
-    {
-      id: 1,
-      name: 'Haifa Art Museum',
-      city: 'Haifa',
-      category: 'Museum',
-      submittedAt: 'Aug 17, 2026',
-      status: 'pending',
-    },
-    {
-      id: 2,
-      name: 'Accessible Café',
-      city: 'Nazareth',
-      category: 'Cafe',
-      submittedAt: 'Aug 10, 2026',
-      status: 'approved',
-    },
-    {
-      id: 3,
-      name: 'Community Garden',
-      city: 'Acre',
-      category: 'Park',
-      submittedAt: 'Aug 04, 2026',
-      status: 'rejected',
-    },
-  ]
+const [loadingSubmissions, setLoadingSubmissions] =
+  useState(true)
+
+useEffect(() => {
+  async function loadProfile() {
+if (authLoading) {
+  return
+}
+
+if (!user) {
+  navigate('/login')
+  return
+}
+
+    try {
+      setLoadingProfile(true)
+
+      const userRef = doc(
+        db,
+        'users',
+        user.uid
+      )
+
+      const userSnapshot =
+        await getDoc(userRef)
+
+      if (!userSnapshot.exists()) {
+        setProfileMessage(
+          'User profile could not be found.'
+        )
+        return
+      }
+
+      const userData =
+        userSnapshot.data()
+
+      const loadedProfile = {
+        fullName:
+          userData.fullName ||
+          user.displayName ||
+          '',
+        email:
+          userData.email ||
+          user.email ||
+          '',
+        accessibilityPreferences:
+          userData.accessibilityPreferences ||
+          [],
+      }
+
+      setProfile(loadedProfile)
+      setDraftProfile(loadedProfile)
+
+    } catch (error) {
+      console.error(
+        'Error loading profile:',
+        error
+      )
+
+      setProfileMessage(
+        'Could not load your profile.'
+      )
+    } finally {
+      setLoadingProfile(false)
+    }
+  }
+
+  loadProfile()
+}, [user, authLoading, navigate])
+
+
+useEffect(() => {
+  async function loadSubmissions() {
+    if (authLoading) {
+      return
+    }
+
+    if (!user) {
+      setSubmissions([])
+      setLoadingSubmissions(false)
+      return
+    }
+
+    try {
+      setLoadingSubmissions(true)
+
+      const submissionsQuery = query(
+        collection(db, 'suggestions'),
+        where('userId', '==', user.uid)
+      )
+
+      const snapshot = await getDocs(
+        submissionsQuery
+      )
+
+      const userSubmissions =
+        snapshot.docs.map(
+          (submissionDocument) => ({
+            firestoreId:
+              submissionDocument.id,
+
+            ...submissionDocument.data(),
+          })
+        )
+
+      userSubmissions.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0) -
+          new Date(a.createdAt || 0)
+      )
+
+      setSubmissions(userSubmissions)
+    } catch (error) {
+      console.error(
+        'Error loading submissions:',
+        error
+      )
+
+      setSubmissions([])
+    } finally {
+      setLoadingSubmissions(false)
+    }
+  }
+
+  loadSubmissions()
+}, [user, authLoading])
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -101,61 +243,164 @@ function Profile() {
     })
   }
 
-  function handleSave() {
-    setProfile(draftProfile)
-    setIsEditing(false)
+async function handleSave() {
+  const user = auth.currentUser
+
+  if (!user) {
+    navigate('/login')
+    return
   }
+
+  try {
+    setProfileMessage('')
+
+    const userRef = doc(
+      db,
+      'users',
+      user.uid
+    )
+
+    await updateDoc(userRef, {
+      fullName: draftProfile.fullName.trim(),
+      accessibilityPreferences:
+        draftProfile.accessibilityPreferences,
+    })
+
+    const updatedProfile = {
+      ...draftProfile,
+      fullName: draftProfile.fullName.trim(),
+    }
+
+    setProfile(updatedProfile)
+    setDraftProfile(updatedProfile)
+    setIsEditing(false)
+
+    setProfileMessage(
+      'Profile updated successfully.'
+    )
+  } catch (error) {
+    console.error(
+      'Error updating profile:',
+      error
+    )
+
+    setProfileMessage(
+      'Could not update your profile.'
+    )
+  }
+}
 
   function handleCancel() {
     setDraftProfile(profile)
     setIsEditing(false)
   }
 
-  function handlePasswordUpdate(event) {
-    event.preventDefault()
+async function handlePasswordUpdate(event) {
+  event.preventDefault()
 
-    if (!newPassword.trim() || !confirmPassword.trim()) {
-      setPasswordMessage('Please complete both password fields.')
-      return
-    }
+  setPasswordMessage('')
 
-    if (newPassword !== confirmPassword) {
-      setPasswordMessage('Passwords do not match.')
-      return
-    }
+  if (!newPassword.trim() || !confirmPassword.trim()) {
+    setPasswordMessage(
+      'Please complete both password fields.'
+    )
+    return
+  }
 
-    setPasswordMessage('Password updated successfully.')
+  if (newPassword !== confirmPassword) {
+    setPasswordMessage(
+      'Passwords do not match.'
+    )
+    return
+  }
+
+  if (newPassword.length < 6) {
+    setPasswordMessage(
+      'Password must be at least 6 characters.'
+    )
+    return
+  }
+
+  if (!user) {
+    navigate('/login')
+    return
+  }
+
+  try {
+    await updatePassword(
+      user,
+      newPassword
+    )
+
+    setPasswordMessage(
+      'Password updated successfully.'
+    )
+
     setNewPassword('')
     setConfirmPassword('')
-  }
+  } catch (error) {
+    console.error(
+      'Password update error:',
+      error
+    )
 
-  function handleLogout() {
-    alert('You have been logged out.')
-  }
-
-  function getStatusContent(status) {
-    if (status === 'approved') {
-      return {
-        icon: BadgeCheck,
-        label: 'Approved',
-      }
+    if (
+      error.code ===
+      'auth/requires-recent-login'
+    ) {
+      setPasswordMessage(
+        'For security, please log out and log in again before changing your password.'
+      )
+    } else if (
+      error.code === 'auth/weak-password'
+    ) {
+      setPasswordMessage(
+        'Please choose a stronger password.'
+      )
+    } else {
+      setPasswordMessage(
+        'Could not update the password. Please try again.'
+      )
     }
-
-    if (status === 'rejected') {
-      return {
-        icon: XCircle,
-        label: 'Rejected',
-      }
-    }
-
+  }
+}
+function getStatusContent(status) {
+  if (status === 'approved') {
     return {
-      icon: Clock3,
-      label: 'Pending',
+      icon: BadgeCheck,
+      label: 'Approved',
     }
   }
+
+  if (status === 'rejected') {
+    return {
+      icon: XCircle,
+      label: 'Rejected',
+    }
+  }
+
+  return {
+    icon: Clock3,
+    label: 'Pending',
+  }
+}
+if (authLoading || loadingProfile){
+  return (
+    <main className="profile-page">
+      <div className="profile-container">
+        <p>Loading profile...</p>
+      </div>
+    </main>
+  )
+}
 
   return (
     <main className="profile-page">
+      {profileMessage && (
+  <div className="profile-password-message">
+    {profileMessage}
+  </div>
+)}
       <div className="profile-container">
 
         <div className="profile-heading">
@@ -365,8 +610,7 @@ function Profile() {
                       name="email"
                       type="email"
                       value={draftProfile.email}
-                      onChange={handleChange}
-                    />
+disabled                    />
                   </div>
 
                 </div>
@@ -530,44 +774,60 @@ function Profile() {
               </p>
             </div>
 
-            <div className="submissions-list">
+<div className="submissions-list">
 
-              {submissions.map((submission) => {
-                const statusContent =
-                  getStatusContent(submission.status)
+  {loadingSubmissions ? (
+    <p className="profile-empty-text">
+      Loading submissions...
+    </p>
+  ) : submissions.length === 0 ? (
+    <p className="profile-empty-text">
+      You haven't suggested any places yet.
+    </p>
+  ) : (
+    submissions.map((submission) => {
+      const statusContent =
+        getStatusContent(submission.status)
 
-                const StatusIcon = statusContent.icon
+      const StatusIcon =
+        statusContent.icon
 
-                return (
-                  <article
-                    key={submission.id}
-                    className="submission-card"
-                  >
+      return (
+        <article
+          key={submission.firestoreId}
+          className="submission-card"
+        >
+          <div>
+            <h3>{submission.name}</h3>
 
-                    <div>
-                      <h3>{submission.name}</h3>
+            <p>
+              {submission.city} ·{' '}
+              {submission.category}
+            </p>
 
-                      <p>
-                        {submission.city} · {submission.category}
-                      </p>
+            <span>
+              Submitted{' '}
+              {submission.createdAt
+                ? new Date(
+                    submission.createdAt
+                  ).toLocaleDateString()
+                : 'Unknown date'}
+            </span>
+          </div>
 
-                      <span>
-                        Submitted {submission.submittedAt}
-                      </span>
-                    </div>
+          <div
+            className={`submission-status status-${submission.status}`}
+          >
+            <StatusIcon size={15} />
+            {statusContent.label}
+          </div>
+        </article>
+      )
+    })
+  )}
 
-                    <div
-                      className={`submission-status status-${submission.status}`}
-                    >
-                      <StatusIcon size={15} />
-                      {statusContent.label}
-                    </div>
+</div>
 
-                  </article>
-                )
-              })}
-
-            </div>
 
           </section>
         )}

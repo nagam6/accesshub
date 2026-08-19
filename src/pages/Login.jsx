@@ -8,7 +8,11 @@ import {
   EyeOff,
   Shield
 } from 'lucide-react'
+import {
+  signInWithEmailAndPassword
+} from 'firebase/auth'
 
+import { auth } from '../firebase/firebase'
 import './Login.css'
 
 function Login() {
@@ -19,18 +23,56 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(event) {
-    event.preventDefault()
+async function handleSubmit(event) {
+  event.preventDefault()
 
-    if (!email.trim() || !password.trim()) {
-      setMessage('Please enter your email and password.')
-      return
-    }
+  setMessage('')
 
-  navigate('/profile')
+  if (!email.trim() || !password.trim()) {
+    setMessage(
+      'Please enter your email and password.'
+    )
+    return
   }
 
+  try {
+    setLoading(true)
+
+    await signInWithEmailAndPassword(
+      auth,
+      email.trim(),
+      password
+    )
+
+    navigate('/profile')
+  } catch (error) {
+    console.error('Login error:', error)
+
+    if (
+      error.code === 'auth/invalid-credential' ||
+      error.code === 'auth/wrong-password' ||
+      error.code === 'auth/user-not-found'
+    ) {
+      setMessage(
+        'Incorrect email or password.'
+      )
+    } else if (
+      error.code === 'auth/invalid-email'
+    ) {
+      setMessage(
+        'Please enter a valid email address.'
+      )
+    } else {
+      setMessage(
+        'Could not log in. Please try again.'
+      )
+    }
+  } finally {
+    setLoading(false)
+  }
+}
   function handleGuest() {
     navigate('/explore')
   }
@@ -163,12 +205,13 @@ function Login() {
 
           {/* LOGIN */}
 
-          <button
-            type="submit"
-            className="login-button"
-          >
-            Log In
-          </button>
+<button
+  type="submit"
+  className="login-button"
+  disabled={loading}
+>
+  {loading ? 'Logging in...' : 'Log In'}
+</button>
 
         </form>
 

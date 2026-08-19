@@ -350,6 +350,18 @@
   font-weight: 700;
   cursor: pointer;
 }
+.explore-status-message {
+  padding: 40px 20px;
+
+  text-align: center;
+
+  color: #61777c;
+  font-weight: 600;
+}
+
+.explore-status-message.error {
+  color: #b54848;
+}
 
 @media (max-width: 850px) {
   .explore-toolbar {

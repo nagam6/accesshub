@@ -1,4 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import {
+  collection,
+  getDocs
+} from 'firebase/firestore'
+
+import { db } from '../firebase/firebase'
+
 import {
   Search,
   SlidersHorizontal,
@@ -7,11 +15,14 @@ import {
   ArrowUpDown
 } from 'lucide-react'
 
-import places from '../data/places'
 import PlaceCard from '../components/PlaceCard'
 import './ExplorePlaces.css'
 
 function ExplorePlaces() {
+  const [places, setPlaces] = useState([])
+  const [loadingPlaces, setLoadingPlaces] = useState(true)
+  const [placesError, setPlacesError] = useState('')
+
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -24,22 +35,81 @@ function ExplorePlaces() {
   const [sortBy, setSortBy] = useState('')
   const [onlyVerified, setOnlyVerified] = useState(false)
 
-  // Create filter options directly from the data
-  const cities = [...new Set(places.map((place) => place.city))]
+  /* =========================
+     LOAD PLACES FROM FIRESTORE
+  ========================= */
 
-  const categories = [
-    ...new Set(places.map((place) => place.category)),
+  useEffect(() => {
+    async function loadPlaces() {
+      try {
+        setLoadingPlaces(true)
+        setPlacesError('')
+
+        const snapshot = await getDocs(
+          collection(db, 'places')
+        )
+
+        const firebasePlaces = snapshot.docs.map(
+          (document) => ({
+            firestoreId: document.id,
+            ...document.data(),
+          })
+        )
+
+        setPlaces(firebasePlaces)
+      } catch (error) {
+        console.error(
+          'Error loading places:',
+          error
+        )
+
+        setPlacesError(
+          'Could not load places. Please try again.'
+        )
+      } finally {
+        setLoadingPlaces(false)
+      }
+    }
+
+    loadPlaces()
+  }, [])
+
+  /* =========================
+     FILTER OPTIONS
+  ========================= */
+
+  const cities = [
+    ...new Set(
+      places
+        .map((place) => place.city)
+        .filter(Boolean)
+    ),
   ]
 
- const accessibilityFeatures = [
-  ...new Set(
-    places.flatMap((place) =>
-      Object.values(place.accessibility)
-        .flat()
-        .map((feature) => feature.name)
-    )
-  ),
-]
+  const categories = [
+    ...new Set(
+      places
+        .map((place) => place.category)
+        .filter(Boolean)
+    ),
+  ]
+
+  const accessibilityFeatures = [
+    ...new Set(
+      places.flatMap((place) =>
+        Object.values(
+          place.accessibility || {}
+        )
+          .flat()
+          .map((feature) => feature.name)
+          .filter(Boolean)
+      )
+    ),
+  ]
+
+  /* =========================
+     SEARCH
+  ========================= */
 
   function handleSearch() {
     setSearchTerm(searchInput.trim())
@@ -57,17 +127,36 @@ function ExplorePlaces() {
     setSelectedCity('')
     setSelectedCategory('')
     setSelectedAccessibility('')
+    setOnlyVerified(false)
+    setSortBy('')
   }
 
+  /* =========================
+     FILTER PLACES
+  ========================= */
+
   const filteredPlaces = places.filter((place) => {
-    const searchValue = searchTerm.toLowerCase()
+    const searchValue =
+      searchTerm.toLowerCase()
+
+    const name =
+      place.name?.toLowerCase() || ''
+
+    const city =
+      place.city?.toLowerCase() || ''
+
+    const category =
+      place.category?.toLowerCase() || ''
+
+    const address =
+      place.address?.toLowerCase() || ''
 
     const matchesSearch =
       searchValue === '' ||
-      place.name.toLowerCase().includes(searchValue) ||
-      place.city.toLowerCase().includes(searchValue) ||
-      place.category.toLowerCase().includes(searchValue) ||
-      place.address.toLowerCase().includes(searchValue)
+      name.includes(searchValue) ||
+      city.includes(searchValue) ||
+      category.includes(searchValue) ||
+      address.includes(searchValue)
 
     const matchesCity =
       selectedCity === '' ||
@@ -77,14 +166,17 @@ function ExplorePlaces() {
       selectedCategory === '' ||
       place.category === selectedCategory
 
-  const matchesAccessibility =
-  selectedAccessibility === '' ||
-  Object.values(place.accessibility)
-    .flat()
-    .some(
-      (feature) =>
-        feature.name === selectedAccessibility
-    )
+    const matchesAccessibility =
+      selectedAccessibility === '' ||
+      Object.values(
+        place.accessibility || {}
+      )
+        .flat()
+        .some(
+          (feature) =>
+            feature.name ===
+            selectedAccessibility
+        )
 
     return (
       matchesSearch &&
@@ -93,48 +185,61 @@ function ExplorePlaces() {
       matchesAccessibility
     )
   })
-const sortedPlaces = [...filteredPlaces]
-  .filter((place) => {
-    if (onlyVerified) {
-      return place.verified
-    }
 
-    return true
-  })
-  .sort((a, b) => {
-    if (sortBy === 'mostReviews') {
-      return b.reviews - a.reviews
-    }
+  /* =========================
+     SORT + VERIFIED
+  ========================= */
 
-    if (sortBy === 'highestRated') {
-      return b.rating - a.rating
-    }
+  const sortedPlaces = [...filteredPlaces]
+    .filter((place) => {
+      if (onlyVerified) {
+        return place.verified
+      }
 
-    if (sortBy === 'recentlyUpdated') {
-      return new Date(b.updatedAt) - new Date(a.updatedAt)
-    }
+      return true
+    })
+    .sort((a, b) => {
+      if (sortBy === 'mostReviews') {
+        return (b.reviews || 0) - (a.reviews || 0)
+      }
 
-    return 0
-  })
+      if (sortBy === 'highestRated') {
+        return (b.rating || 0) - (a.rating || 0)
+      }
+
+      if (sortBy === 'recentlyUpdated') {
+        return (
+          new Date(b.updatedAt || 0) -
+          new Date(a.updatedAt || 0)
+        )
+      }
+
+      return 0
+    })
+
   return (
     <section className="explore-page">
       <div className="explore-container">
 
-        {/* Page Heading */}
+        {/* PAGE HEADING */}
+
         <div className="explore-heading">
           <span className="section-label">
             EXPLORE PLACES
           </span>
 
-          <h1>Find a place that works for you</h1>
+          <h1>
+            Find a place that works for you
+          </h1>
 
           <p>
-            Search and filter places by location, category,
-            and accessibility features.
+            Search and filter places by location,
+            category, and accessibility features.
           </p>
         </div>
 
-        {/* Search */}
+        {/* SEARCH */}
+
         <div className="explore-toolbar">
 
           <div className="explore-search">
@@ -163,10 +268,14 @@ const sortedPlaces = [...filteredPlaces]
           <button
             type="button"
             className={`filters-button ${
-              showFilters ? 'filters-active' : ''
+              showFilters
+                ? 'filters-active'
+                : ''
             }`}
             onClick={() =>
-              setShowFilters((current) => !current)
+              setShowFilters(
+                (current) => !current
+              )
             }
           >
             {showFilters ? (
@@ -180,7 +289,8 @@ const sortedPlaces = [...filteredPlaces]
 
         </div>
 
-        {/* Filters */}
+        {/* FILTERS */}
+
         {showFilters && (
           <div className="filters-panel">
 
@@ -193,13 +303,20 @@ const sortedPlaces = [...filteredPlaces]
                 id="city-filter"
                 value={selectedCity}
                 onChange={(event) =>
-                  setSelectedCity(event.target.value)
+                  setSelectedCity(
+                    event.target.value
+                  )
                 }
               >
-                <option value="">All cities</option>
+                <option value="">
+                  All cities
+                </option>
 
                 {cities.map((city) => (
-                  <option key={city} value={city}>
+                  <option
+                    key={city}
+                    value={city}
+                  >
                     {city}
                   </option>
                 ))}
@@ -215,19 +332,25 @@ const sortedPlaces = [...filteredPlaces]
                 id="category-filter"
                 value={selectedCategory}
                 onChange={(event) =>
-                  setSelectedCategory(event.target.value)
+                  setSelectedCategory(
+                    event.target.value
+                  )
                 }
               >
-                <option value="">All categories</option>
+                <option value="">
+                  All categories
+                </option>
 
-                {categories.map((category) => (
-                  <option
-                    key={category}
-                    value={category}
-                  >
-                    {category}
-                  </option>
-                ))}
+                {categories.map(
+                  (category) => (
+                    <option
+                      key={category}
+                      value={category}
+                    >
+                      {category}
+                    </option>
+                  )
+                )}
               </select>
             </div>
 
@@ -274,75 +397,129 @@ const sortedPlaces = [...filteredPlaces]
           </div>
         )}
 
-        {/* Results */}
- <div className="results-header">
-  <p className="results-count">
-    <strong>{sortedPlaces.length}</strong>{' '}
-    {sortedPlaces.length === 1
-      ? 'place found'
-      : 'places found'}
-  </p>
+        {/* LOADING */}
 
-  <div className="results-controls">
-    <div className="sort-control">
-      <label htmlFor="sort-select"><ArrowUpDown size={17} />
-      Sort:</label>
-
-      <select
-        id="sort-select"
-        value={sortBy}
-        onChange={(event) =>
-          setSortBy(event.target.value)
-        }
-      >
-         <option value="">- - - </option>
-
-        <option value="mostReviews">Most Reviews</option>
-        <option value="highestRated">Highest Rated</option>
-        <option value="recentlyUpdated">Recently Updated</option>
-      </select>
-    </div>
-
-    <label className="verified-filter">
-      <input
-        type="checkbox"
-        checked={onlyVerified}
-        onChange={(event) =>
-          setOnlyVerified(event.target.checked)
-        }
-      />
-      Only verified
-    </label>
-  </div>
-</div>
-
-        {/* Cards */}
-        {sortedPlaces.length > 0 ? (
-          <div className="places-grid">
-            {sortedPlaces.map((place) => (
-              <PlaceCard
-                key={place.id}
-                place={place}
-              />
-            ))}
+        {loadingPlaces && (
+          <div className="explore-status-message">
+            Loading places...
           </div>
-        ) : (
-          <div className="no-results">
-            <Search size={34} />
+        )}
 
-            <h2>No places found</h2>
+        {/* ERROR */}
 
-            <p>
-              Try changing your search or filters.
-            </p>
-
-            <button
-              type="button"
-              onClick={handleResetFilters}
-            >
-              Clear search and filters
-            </button>
+        {placesError && (
+          <div className="explore-status-message error">
+            {placesError}
           </div>
+        )}
+
+        {/* RESULTS */}
+
+        {!loadingPlaces && !placesError && (
+          <>
+            <div className="results-header">
+
+              <p className="results-count">
+                <strong>
+                  {sortedPlaces.length}
+                </strong>{' '}
+
+                {sortedPlaces.length === 1
+                  ? 'place found'
+                  : 'places found'}
+              </p>
+
+              <div className="results-controls">
+
+                <div className="sort-control">
+                  <label htmlFor="sort-select">
+                    <ArrowUpDown size={17} />
+                    Sort:
+                  </label>
+
+                  <select
+                    id="sort-select"
+                    value={sortBy}
+                    onChange={(event) =>
+                      setSortBy(
+                        event.target.value
+                      )
+                    }
+                  >
+                    <option value="">
+                      - - -
+                    </option>
+
+                    <option value="mostReviews">
+                      Most Reviews
+                    </option>
+
+                    <option value="highestRated">
+                      Highest Rated
+                    </option>
+
+                    <option value="recentlyUpdated">
+                      Recently Updated
+                    </option>
+                  </select>
+                </div>
+
+                <label className="verified-filter">
+                  <input
+                    type="checkbox"
+                    checked={onlyVerified}
+                    onChange={(event) =>
+                      setOnlyVerified(
+                        event.target.checked
+                      )
+                    }
+                  />
+
+                  Only verified
+                </label>
+
+              </div>
+
+            </div>
+
+            {/* CARDS */}
+
+            {sortedPlaces.length > 0 ? (
+              <div className="places-grid">
+
+                {sortedPlaces.map((place) => (
+                  <PlaceCard
+                    key={
+                      place.firestoreId ||
+                      place.id
+                    }
+                    place={place}
+                  />
+                ))}
+
+              </div>
+            ) : (
+              <div className="no-results">
+
+                <Search size={34} />
+
+                <h2>No places found</h2>
+
+                <p>
+                  Try changing your search
+                  or filters.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                >
+                  Clear search and filters
+                </button>
+
+              </div>
+            )}
+          </>
         )}
 
       </div>

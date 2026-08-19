@@ -14,6 +14,8 @@ import AdminPlaces from './pages/AdminPlaces'
 import AdminPlaceForm from './pages/AdminPlaceForm'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
+import AdminSuggestions from './pages/AdminSuggestions'
+import AdminReports from './pages/AdminReports'
 import './App.css'
 
 const router = createBrowserRouter([
@@ -72,6 +74,18 @@ const router = createBrowserRouter([
            {
         path: 'admin/places/new',
         element: <AdminPlaceForm />,
+      },
+              {
+        path: 'admin/places/:id/edit',
+        element: <AdminPlaceForm />,
+      },
+                 {
+        path: 'admin/suggestions',
+        element: <AdminSuggestions />,
+      },
+                   {
+        path: 'admin/reports',
+        element: <AdminReports />,
       },
       {
         path: '*',

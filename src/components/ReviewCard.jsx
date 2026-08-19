@@ -91,14 +91,6 @@ function ReviewCard({ review }) {
           Helpful ({helpfulCount})
         </button>
 
-        <button
-          type="button"
-          onClick={handleReport}
-        >
-          <Flag size={17} />
-          Report
-        </button>
-
       </div>
 
     </article>

@@ -7,18 +7,107 @@ import {
   PlusCircle
 } from 'lucide-react'
 
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import places from '../data/places'
-import reviews from '../data/reviews'
+
+import {
+  collection,
+  getDocs
+} from 'firebase/firestore'
+
+import { db } from '../firebase/firebase'
 import './AdminDashboard.css'
 
 function AdminDashboard() {
-  const pendingSuggestions = 3
-  const openReports = 2
 
-  const verifiedPlaces = places.filter(
-    (place) => place.verified
-  ).length
+const [places, setPlaces] = useState([])
+const [reviews, setReviews] = useState([])
+
+const [pendingSuggestions, setPendingSuggestions] =
+  useState(0)
+
+const [openReports, setOpenReports] =
+  useState(0)
+
+const [loadingDashboard, setLoadingDashboard] =
+  useState(true)
+
+  useEffect(() => {
+  async function loadDashboard() {
+    try {
+      setLoadingDashboard(true)
+
+      const [
+        placesSnapshot,
+        reviewsSnapshot,
+        suggestionsSnapshot,
+        reportsSnapshot,
+      ] = await Promise.all([
+        getDocs(collection(db, 'places')),
+        getDocs(collection(db, 'reviews')),
+        getDocs(collection(db, 'suggestions')),
+        getDocs(collection(db, 'reports')),
+      ])
+
+      const placesData =
+        placesSnapshot.docs.map(
+          (placeDocument) => ({
+            firestoreId: placeDocument.id,
+            ...placeDocument.data(),
+          })
+        )
+
+      const reviewsData =
+        reviewsSnapshot.docs.map(
+          (reviewDocument) => ({
+            firestoreId: reviewDocument.id,
+            ...reviewDocument.data(),
+          })
+        )
+
+      const suggestionsData =
+        suggestionsSnapshot.docs.map(
+          (suggestionDocument) =>
+            suggestionDocument.data()
+        )
+
+      const reportsData =
+        reportsSnapshot.docs.map(
+          (reportDocument) =>
+            reportDocument.data()
+        )
+
+      setPlaces(placesData)
+      setReviews(reviewsData)
+
+      setPendingSuggestions(
+        suggestionsData.filter(
+          (suggestion) =>
+            suggestion.status === 'pending'
+        ).length
+      )
+
+      setOpenReports(
+        reportsData.filter(
+          (report) =>
+            report.status === 'open'
+        ).length
+      )
+    } catch (error) {
+      console.error(
+        'Error loading admin dashboard:',
+        error
+      )
+    } finally {
+      setLoadingDashboard(false)
+    }
+  }
+
+  loadDashboard()
+}, [])
+const verifiedPlaces = places.filter(
+  (place) => place.verified
+).length
 
   return (
     <main className="admin-page">
@@ -229,8 +318,7 @@ function AdminDashboard() {
 
               <tbody>
                 {places.slice(0, 5).map((place) => (
-                  <tr key={place.id}>
-                    <td>
+<tr key={place.firestoreId}>                    <td>
                       <strong>{place.name}</strong>
                     </td>
 

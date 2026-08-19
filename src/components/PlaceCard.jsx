@@ -22,12 +22,16 @@ function PlaceCard({ place }) {
     <article className="place-card">
 
       <div className="place-image-wrapper">
-        <img
-          src={place.images[0]}
-          alt={place.name}
-          className="place-image"
-        />
-
+{place.images?.[0] ? (
+  <img
+    src={place.images[0]}
+    alt={place.name}
+  />
+) : (
+  <div className="place-card-image-placeholder">
+    <span>{place.name}</span>
+  </div>
+)}
         {place.verified && (
           <span className="verified-badge">
             <BadgeCheck size={16} />

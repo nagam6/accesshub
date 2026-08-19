@@ -1,5 +1,16 @@
-import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import {useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where
+} from 'firebase/firestore'
+import { db } from '../firebase/firebase'
+import { auth } from '../firebase/firebase'
 
 import {
   ArrowLeft,
@@ -23,35 +34,145 @@ import {
   Bus,
 } from 'lucide-react'
 
-import places from '../data/places'
-import reviews from '../data/reviews'
 import ReviewCard from '../components/ReviewCard'
 import { useFavorites } from '../context/FavoritesContext'
 
 import './PlaceDetails.css'
 
 function PlaceDetails() {
+  const navigate = useNavigate()
   const { id } = useParams()
+
+  const [place, setPlace] = useState(null)
+  const [loadingPlace, setLoadingPlace] = useState(true)
+  const [placeError, setPlaceError] = useState('')
 
   const { toggleFavorite, isFavorite } = useFavorites()
 
   const [selectedImage, setSelectedImage] = useState(0)
 
-const [showReviewForm, setShowReviewForm] = useState(false)
-const [showReportForm, setShowReportForm] = useState(false)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [showReportForm, setShowReportForm] = useState(false)
 
-const [newRating, setNewRating] = useState(5)
-const [newComment, setNewComment] = useState('')
+  const [newRating, setNewRating] = useState(5)
+  const [newComment, setNewComment] = useState('')
 
-const [reportReason, setReportReason] = useState('')
+  const [reportReason, setReportReason] = useState('')
 
   const [showAllReviews, setShowAllReviews] = useState(false)
-  const place = places.find(
-    (item) => item.id === Number(id)
-  )
-  const favorite = place ? isFavorite(place.id) : false
+  const [localReviews, setLocalReviews] = useState([])
 
-  if (!place) {
+  // Load place from Firestore
+  useEffect(() => {
+    async function loadPlace() {
+      try {
+        setLoadingPlace(true)
+        setPlaceError('')
+
+        const placeRef = doc(
+          db,
+          'places',
+          id
+        )
+
+        const placeSnapshot = await getDoc(placeRef)
+
+        if (!placeSnapshot.exists()) {
+          setPlace(null)
+          setPlaceError('Place not found.')
+          return
+        }
+
+        setPlace({
+          firestoreId: placeSnapshot.id,
+          ...placeSnapshot.data(),
+        })
+      } catch (error) {
+        console.error(
+          'Error loading place:',
+          error
+        )
+
+        setPlaceError(
+          'Could not load this place.'
+        )
+      } finally {
+        setLoadingPlace(false)
+      }
+    }
+
+    loadPlace()
+  }, [id])
+
+  // Load temporary mock reviews for this place
+useEffect(() => {
+  async function loadReviews() {
+    if (!place) {
+      setLocalReviews([])
+      return
+    }
+
+    try {
+      const reviewsQuery = query(
+        collection(db, 'reviews'),
+        where('placeId', '==', Number(place.id))
+      )
+
+      const snapshot = await getDocs(reviewsQuery)
+
+      const firebaseReviews = snapshot.docs.map(
+        (reviewDocument) => ({
+          firestoreId: reviewDocument.id,
+          ...reviewDocument.data(),
+        })
+      )
+
+      setLocalReviews(firebaseReviews)
+    } catch (error) {
+      console.error(
+        'Error loading reviews:',
+        error
+      )
+
+      setLocalReviews([])
+    }
+  }
+
+  loadReviews()
+}, [place])
+
+  const favorite = place
+    ? isFavorite(place.id)
+    : false
+
+  if (loadingPlace) {
+  return (
+    <main className="place-details-page">
+      <div className="place-details-container">
+
+        <Link
+          to="/places"
+          className="back-to-explore"
+        >
+          <ArrowLeft size={18} />
+          Back to Explore
+        </Link>
+
+        <div className="place-not-found">
+          <h1>Loading place...</h1>
+
+          <p>
+            Please wait while we load
+            the place information.
+          </p>
+        </div>
+
+      </div>
+    </main>
+  )
+}
+
+ if (placeError || !place)  {
     return (
       <main className="place-details-page">
         <div className="place-details-container">
@@ -68,7 +189,8 @@ const [reportReason, setReportReason] = useState('')
             <h1>Place not found</h1>
 
             <p>
-              The place you are looking for does not exist.
+              {placeError ||
+              'The place you are looking for does not exist.'}
             </p>
           </div>
 
@@ -77,9 +199,6 @@ const [reportReason, setReportReason] = useState('')
     )
   }
 
- const [localReviews, setLocalReviews] = useState(
-  reviews.filter((review) => review.placeId === place.id)
-)
 
  const visibleReviews = showAllReviews
   ? localReviews
@@ -92,8 +211,8 @@ const [reportReason, setReportReason] = useState('')
       ${place.name}.
       ${place.category} in ${place.city}.
       Accessibility match ${place.accessibilityMatch} percent.
-      ${place.visitInfo.entrance}
-      ${place.visitInfo.parking}
+    ${place.visitInfo?.entrance || ''}
+${place.visitInfo?.parking || ''}
     `
 
     const speech = new SpeechSynthesisUtterance(text)
@@ -123,57 +242,90 @@ const [reportReason, setReportReason] = useState('')
     }
   }
 
-  const accessibilityGroups = [
-    {
-      title: 'Mobility Access',
-      icon: Accessibility,
-      items: place.accessibility.mobility,
-    },
-    {
-      title: 'Visual Access',
-      icon: Eye,
-      items: place.accessibility.visual,
-    },
-    {
-      title: 'Hearing Access',
-      icon: Ear,
-      items: place.accessibility.hearing,
-    },
-    {
-      title: 'Sensory Access',
-      icon: Sparkles,
-      items: place.accessibility.sensory,
-    },
-  ]
-function handleAddReview(event) {
+
+const accessibilityGroups = [
+  {
+    title: 'Mobility Access',
+    icon: Accessibility,
+    items:
+      place.accessibility?.mobility || [],
+  },
+  {
+    title: 'Visual Access',
+    icon: Eye,
+    items:
+      place.accessibility?.visual || [],
+  },
+  {
+    title: 'Hearing Access',
+    icon: Ear,
+    items:
+      place.accessibility?.hearing || [],
+  },
+  {
+    title: 'Sensory Access',
+    icon: Sparkles,
+    items:
+      place.accessibility?.sensory || [],
+  },
+]
+async function handleAddReview(event) {
   event.preventDefault()
 
   if (!newComment.trim()) {
-    alert('Please write a review before submitting.')
+    alert(
+      'Please write a review before submitting.'
+    )
     return
   }
 
-  const review = {
-    id: Date.now(),
-    placeId: place.id,
-    userName: 'Anonymous',
-    rating: Number(newRating),
-    visitDate: new Date().toISOString().split('T')[0],
-    comment: newComment.trim(),
-    helpful: 0,
+  try {
+    const reviewData = {
+      placeId: Number(place.id),
+      userId: auth.currentUser.uid,
+userName:
+  auth.currentUser.displayName ||
+  auth.currentUser.email ||
+  'AccessHub User',
+      rating: Number(newRating),
+      visitDate:
+        new Date().toISOString().split('T')[0],
+      comment: newComment.trim(),
+      helpful: 0,
+    }
+
+    const reviewRef = await addDoc(
+      collection(db, 'reviews'),
+      reviewData
+    )
+
+    const newReview = {
+      firestoreId: reviewRef.id,
+      ...reviewData,
+    }
+
+    setLocalReviews((current) => [
+      newReview,
+      ...current,
+    ])
+
+    setNewRating(5)
+    setNewComment('')
+    setShowReviewForm(false)
+
+    alert('Review submitted successfully!')
+  } catch (error) {
+    console.error(
+      'Error adding review:',
+      error
+    )
+
+    alert(
+      'Could not submit your review. Please try again.'
+    )
   }
-
-  setLocalReviews((current) => [
-    review,
-    ...current,
-  ])
-
-  setNewRating(5)
-  setNewComment('')
-  setShowReviewForm(false)
 }
-
-function handleReportInformation(event) {
+async function handleReportInformation(event) {
   event.preventDefault()
 
   if (!reportReason.trim()) {
@@ -181,10 +333,52 @@ function handleReportInformation(event) {
     return
   }
 
-  alert('Thank you. Your report was submitted for review.')
+  if (!auth.currentUser) {
+    navigate('/login')
+    return
+  }
 
-  setReportReason('')
-  setShowReportForm(false)
+  try {
+    const reportData = {
+      placeId: Number(place.id),
+      placeName: place.name,
+
+      userId: auth.currentUser.uid,
+
+      userName:
+        auth.currentUser.displayName ||
+        auth.currentUser.email ||
+        'AccessHub User',
+
+      reason: reportReason.trim(),
+
+      status: 'open',
+
+      createdAt:
+        new Date().toISOString(),
+    }
+
+    await addDoc(
+      collection(db, 'reports'),
+      reportData
+    )
+
+    alert(
+      'Thank you. Your report was submitted for review.'
+    )
+
+    setReportReason('')
+    setShowReportForm(false)
+  } catch (error) {
+    console.error(
+      'Error submitting report:',
+      error
+    )
+
+    alert(
+      'Could not submit the report. Please try again.'
+    )
+  }
 }
   return (
     <main className="place-details-page">
@@ -202,46 +396,46 @@ function handleReportInformation(event) {
 
         {/* GALLERY */}
 
-        <section className="place-gallery">
+{place.images?.length > 0 && (
+  <section className="place-gallery">
 
-          <div className="gallery-main">
-            <img
-              src={place.images[selectedImage]}
-              alt={place.name}
-            />
+    <div className="gallery-main">
+      <img
+        src={place.images[selectedImage]}
+        alt={place.name}
+      />
 
-            {place.verified && (
-              <span className="details-verified-badge">
-                <BadgeCheck size={17} />
-                Verified
-              </span>
-            )}
-          </div>
+      {place.verified && (
+        <span className="details-verified-badge">
+          <BadgeCheck size={17} />
+          Verified
+        </span>
+      )}
+    </div>
 
-          <div className="gallery-thumbnails">
-            {place.images.map((image, index) => (
-              <button
-                key={`${place.id}-${index}`}
-                type="button"
-                className={`gallery-thumbnail ${
-                  selectedImage === index
-                    ? 'gallery-thumbnail-active'
-                    : ''
-                }`}
-                onClick={() =>
-                  setSelectedImage(index)
-                }
-                aria-label={`View image ${index + 1} of ${place.name}`}
-              >
-                <img
-                  src={image}
-                  alt={`${place.name} view ${index + 1}`}
-                />
-              </button>
-            ))}
-          </div>
+    <div className="gallery-thumbnails">
+      {place.images.map((image, index) => (
+        <button
+          key={`${place.id}-${index}`}
+          type="button"
+          className={`gallery-thumbnail ${
+            selectedImage === index
+              ? 'gallery-thumbnail-active'
+              : ''
+          }`}
+          onClick={() => setSelectedImage(index)}
+          aria-label={`View image ${index + 1} of ${place.name}`}
+        >
+          <img
+            src={image}
+            alt={`${place.name} view ${index + 1}`}
+          />
+        </button>
+      ))}
+    </div>
 
-        </section>
+  </section>
+)}
 
         {/* PLACE INFORMATION */}
 
@@ -550,7 +744,14 @@ function handleReportInformation(event) {
 
            <button
   type="button"
-  onClick={() => setShowReviewForm(true)}
+  onClick={() => {
+  if (!auth.currentUser) {
+    navigate('/login')
+    return
+  }
+
+  setShowReviewForm(true)
+}}
 >
   Add Review
 </button>
@@ -573,7 +774,14 @@ function handleReportInformation(event) {
 
         <button
   type="button"
-  onClick={() => setShowReportForm(true)}
+  onClick={() => {
+  if (!auth.currentUser) {
+    navigate('/login')
+    return
+  }
+
+  setShowReportForm(true)
+}}
 >
   Report Information
 </button>
@@ -721,10 +929,10 @@ function handleReportInformation(event) {
 
               {visibleReviews.map(
                 (review) => (
-                  <ReviewCard
-                    key={review.id}
-                    review={review}
-                  />
+              <ReviewCard
+  key={review.firestoreId || review.id}
+  review={review}
+/>
                 )
               )}
 {localReviews.length > 2 && (
