@@ -21,7 +21,6 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -74,7 +73,7 @@ async function handleSubmit(event) {
   }
 }
   function handleGuest() {
-    navigate('/explore')
+    navigate('/')
   }
 
   return (
@@ -182,20 +181,6 @@ async function handleSubmit(event) {
           {/* OPTIONS */}
 
           <div className="login-options">
-
-            <label className="remember-option">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) =>
-                  setRememberMe(
-                    event.target.checked
-                  )
-                }
-              />
-
-              <span>Remember me</span>
-            </label>
 
             <Link to="/forgot-password">
               Forgot password?

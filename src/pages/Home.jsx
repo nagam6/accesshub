@@ -13,13 +13,56 @@ import {
 
 import AccessibilityCard from '../components/AccessibilityCard'
 
-import places from '../data/places'
 import PlaceCard from '../components/PlaceCard'
+import {
+  useEffect,
+  useState
+} from 'react'
+
 import { Link } from 'react-router-dom'
+import {
+  collection,
+  getDocs
+} from 'firebase/firestore'
+
+import { db } from '../firebase/firebase'
 
 import './Home.css'
 
 function Home() {
+  const [places, setPlaces] = useState([])
+const [loadingPlaces, setLoadingPlaces] = useState(true)
+useEffect(() => {
+  async function loadPlaces() {
+    try {
+      setLoadingPlaces(true)
+
+      const snapshot = await getDocs(
+        collection(db, 'places')
+      )
+
+      const placesData = snapshot.docs.map(
+        (document) => ({
+          firestoreId: document.id,
+          ...document.data(),
+        })
+      )
+
+      setPlaces(placesData)
+    } catch (error) {
+      console.error(
+        'Error loading home places:',
+        error
+      )
+
+      setPlaces([])
+    } finally {
+      setLoadingPlaces(false)
+    }
+  }
+
+  loadPlaces()
+}, [])
   return (
     <>
     <section className="hero-section"
@@ -150,9 +193,16 @@ function Home() {
     </div>
 
     <div className="places-grid">
-      {places.map((place) => (
-        <PlaceCard key={place.id} place={place} />
-      ))}
+{!loadingPlaces &&
+  places
+    .filter((place) => place.verified)
+    .slice(0, 3)
+    .map((place) => (
+      <PlaceCard
+        key={place.firestoreId || place.id}
+        place={place}
+      />
+    ))}
     </div>
       <div className="view-all-wrapper">
       <Link to="/places" className="view-all-link">

@@ -1,0 +1,103 @@
+.not-found-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+
+  background-color: #f5f8f8;
+}
+
+.not-found-container {
+  width: 100%;
+  max-width: 600px;
+
+  text-align: center;
+}
+
+.not-found-code {
+  margin: 0;
+
+  color: #08777c;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(5rem, 12vw, 8rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.not-found-container h1 {
+  margin: 16px 0 10px;
+
+  color: #102f3e;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.not-found-container p {
+  max-width: 480px;
+
+  margin: 0 auto 28px;
+
+  color: #687b80;
+
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.not-found-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 13px 22px;
+
+  border-radius: 11px;
+
+  background-color: #08777c;
+  color: #ffffff;
+
+  text-decoration: none;
+  font-weight: 800;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.not-found-button:hover {
+  background-color: #06666a;
+  transform: translateY(-2px);
+}
+.not-found-icon {
+  width: 64px;
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 20px;
+
+  border-radius: 18px;
+
+  background-color: #e4f2f1;
+  color: #08777c;
+}
+@media (max-width: 520px) {
+  .not-found-page {
+    padding: 30px 18px;
+  }
+
+  .not-found-code {
+    font-size: 5rem;
+  }
+
+  .not-found-container h1 {
+    font-size: 2rem;
+  }
+}
