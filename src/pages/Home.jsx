@@ -12,26 +12,56 @@ import {
 } from 'lucide-react'
 
 import AccessibilityCard from '../components/AccessibilityCard'
-
 import PlaceCard from '../components/PlaceCard'
 import {
   useEffect,
   useState
 } from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate} from 'react-router-dom'
 import {
   collection,
   getDocs
 } from 'firebase/firestore'
 
 import { db } from '../firebase/firebase'
-
 import './Home.css'
 
 function Home() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [places, setPlaces] = useState([])
-const [loadingPlaces, setLoadingPlaces] = useState(true)
+  const cities = [
+  ...new Set(
+    places
+      .map((place) => place.city)
+      .filter(Boolean)
+  ),
+].sort()
+const [heroSearch, setHeroSearch] = useState('')
+const [heroCity, setHeroCity] = useState('')
+const [isListening, setIsListening] = useState(false)
+ const [loadingPlaces, setLoadingPlaces] = useState(true)
+useEffect(() => {
+  if (!location.hash) {
+    return
+  }
+
+  const sectionId =
+    location.hash.replace('#', '')
+
+  setTimeout(() => {
+    const section =
+      document.getElementById(sectionId)
+
+    if (section) {
+      section.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }
+  }, 100)
+}, [location.hash])
 useEffect(() => {
   async function loadPlaces() {
     try {
@@ -41,12 +71,17 @@ useEffect(() => {
         collection(db, 'places')
       )
 
-      const placesData = snapshot.docs.map(
-        (document) => ({
-          firestoreId: document.id,
-          ...document.data(),
-        })
-      )
+const placesData = snapshot.docs.map(
+  (document) => {
+    const placeData = document.data()
+
+    return {
+      ...placeData,
+      firestoreId: document.id,
+      id: placeData.id ?? document.id,
+    }
+  }
+)
 
       setPlaces(placesData)
     } catch (error) {
@@ -63,6 +98,69 @@ useEffect(() => {
 
   loadPlaces()
 }, [])
+function handleHeroSearch() {
+  const params = new URLSearchParams()
+
+  if (heroSearch.trim()) {
+    params.set(
+      'search',
+      heroSearch.trim()
+    )
+  }
+
+  if (heroCity) {
+    params.set(
+      'city',
+      heroCity
+    )
+  }
+
+  const queryString = params.toString()
+
+  navigate(
+    queryString
+      ? `/places?${queryString}`
+      : '/places'
+  )
+}
+function handleHeroListen() {
+  if (!('speechSynthesis' in window)) {
+    alert(
+      'Text-to-speech is not supported in this browser.'
+    )
+    return
+  }
+
+  if (isListening) {
+    window.speechSynthesis.cancel()
+    setIsListening(false)
+    return
+  }
+
+  window.speechSynthesis.cancel()
+
+  const text = `
+    Find places that work for you.
+    Find public, local, and tourist places
+    with clear accessibility information
+    before you visit.
+  `
+
+  const speech =
+    new SpeechSynthesisUtterance(text)
+
+  speech.onend = () => {
+    setIsListening(false)
+  }
+
+  speech.onerror = () => {
+    setIsListening(false)
+  }
+
+  setIsListening(true)
+
+  window.speechSynthesis.speak(speech)
+}
   return (
     <>
     <section className="hero-section"
@@ -82,41 +180,76 @@ useEffect(() => {
   <br />
   information before you visit.
 </p>
-        <div className="search-box">
-          <div className="search-field">
-            <Search size={21} />
-            <input
-              type="text"
-              placeholder="Search for a place or category"
-            />
-          </div>
+  <div className="search-box">
 
-          <div className="search-field city-field">
-            <MapPin size={21} />
-            <select defaultValue="">
-              <option value="" disabled>
-                Choose city
-              </option>
-              <option value="haifa">Haifa</option>
-              <option value="nazareth">Nazareth</option>
-              <option value="acre">Acre</option>
-            </select>
-          </div>
+  <div className="search-field">
+    <Search size={21} />
 
-          <button className="search-button">
-            <Search size={20} />
-            Search
-          </button>
-        </div>
+    <input
+      type="text"
+      placeholder="Search for a place or category"
+      value={heroSearch}
+      onChange={(event) =>
+        setHeroSearch(event.target.value)
+      }
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          handleHeroSearch()
+        }
+      }}
+    />
+  </div>
 
-        <button className="listen-button">
-          <Volume2 size={20} />
-          Listen to description
-        </button>
+  <div className="search-field city-field">
+    <MapPin size={21} />
+
+<select
+  value={heroCity}
+  onChange={(event) =>
+    setHeroCity(event.target.value)
+  }
+>
+  <option value="">
+    Choose city
+  </option>
+
+  {cities.map((city) => (
+    <option
+      key={city}
+      value={city}
+    >
+      {city}
+    </option>
+  ))}
+</select>
+    
+  </div>
+
+  <button
+    type="button"
+    className="search-button"
+    onClick={handleHeroSearch}
+  >
+    <Search size={20} />
+    Search
+  </button>
+
+</div>
+      <button
+  type="button"
+  className="listen-button"
+  onClick={handleHeroListen}
+>
+  <Volume2 size={20} />
+
+  {isListening
+    ? 'Stop listening'
+    : 'Listen to description'}
+</button>
       </div>
     </section>
 
-    <section className="accessibility-section">
+    <section className="accessibility-section" id="accessibility">
   <div className="accessibility-container">
 
     <div className="section-heading">
@@ -127,6 +260,7 @@ useEffect(() => {
         suitable places.
       </p>
     </div>
+    
 
     <div className="accessibility-grid">
 
@@ -211,7 +345,8 @@ useEffect(() => {
     </div>
   </div>
 </section>
-<section className="how-it-works-section">
+
+<section className="how-it-works-section" id="how-it-works">
   <div className="how-it-works-container">
 
     <div className="how-it-works-heading">

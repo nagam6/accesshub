@@ -35,6 +35,50 @@
   line-height: 1.7;
 }
 
+.suggest-login-notice {
+  max-width: 850px;
+  margin: 0 auto 28px;
+  padding: 14px 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  border: 1px solid #c9e2df;
+  border-radius: 12px;
+
+  background-color: #edf7f5;
+  color: #35565d;
+
+  font-size: 0.94rem;
+}
+
+.suggest-login-notice button {
+  flex-shrink: 0;
+
+  padding: 9px 17px;
+
+  border: none;
+  border-radius: 9px;
+
+  background-color: #08777c;
+  color: #ffffff;
+
+  font: inherit;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.suggest-login-notice button:hover {
+  background-color: #06656a;
+  transform: translateY(-1px);
+}
 /* SUCCESS */
 
 .suggest-success {

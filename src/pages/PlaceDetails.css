@@ -261,20 +261,21 @@
   font-size: 0.9rem;
 }
 
-.listen-place-button {
+.place-listen-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 
   padding: 13px 18px;
 
-  border: none;
-  border-radius: 13px;
+    border: none;
+  border-radius: 999px;
 
-  background-color: #ff7657;
-  color: #ffffff;
-
+ background-color: #ff7c5c;
+  color: #2f2420;
+font-size: 1rem;
   font-weight: 700;
+
 
   cursor: pointer;
 
@@ -283,9 +284,9 @@
     transform 0.2s ease;
 }
 
-.listen-place-button:hover {
-  background-color: #ff6543;
-  transform: translateY(-1px);
+.place-listen-button:hover  {
+  background-color: #ff6c48;
+  transform: translateY(-2px);
 }
 
 /* =========================
@@ -409,7 +410,7 @@
   color: #6e716b;
 }
 
-.status-not_available {
+.status-unavailable {
   background-color: #fde8e5;
   color: #ae4237;
 }
@@ -599,35 +600,32 @@
   }
 }
 
-.show-more-reviews {
-  margin-top: 22px;
-  text-align: center;
-}
+.more-reviews-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 
-.show-more-reviews button {
-  padding: 11px 18px;
+  margin: 24px auto 0;
 
-  border: 1px solid #08777c;
-  border-radius: 11px;
+  border: none;
+  background: transparent;
 
-  background-color: #ffffff;
   color: #08777c;
-
+  font: inherit;
   font-weight: 700;
+
   cursor: pointer;
+  padding: 6px 10px;
+
+  transition:
+    gap 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.show-more-reviews button:hover {
-  background-color: #e9f4f3;
-}
-.action-form-card {
-  margin-top: 28px;
-  padding: 26px;
-
-  border: 1px solid #dce5e5;
-  border-radius: 18px;
-
-  background-color: #ffffff;
+.more-reviews-button:hover {
+  gap: 10px;
+  opacity: 0.8;
 }
 
 .action-form-heading {

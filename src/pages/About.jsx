@@ -14,25 +14,57 @@ import {
 } from 'lucide-react'
 
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 import './About.css'
 
 function About() {
-  function handleListen() {
-    const text = `
-      AccessHub helps people understand how accessible a place is before they visit.
-      We bring clear accessibility information,
-      community experiences,
-      and verified updates together in one place.
-    `
 
-    window.speechSynthesis.cancel()
+const [isListening, setIsListening] = useState(false)
 
-    const speech = new SpeechSynthesisUtterance(text)
-
-    window.speechSynthesis.speak(speech)
+function handleListen() {
+  if (!('speechSynthesis' in window)) {
+    alert(
+      'Text-to-speech is not supported in this browser.'
+    )
+    return
   }
 
+  if (isListening) {
+    window.speechSynthesis.cancel()
+    setIsListening(false)
+    return
+  }
+
+  window.speechSynthesis.cancel()
+
+  const text = `
+    About AccessHub.
+    AccessHub helps people understand how accessible a place is before they visit.
+    We bring clear accessibility information,
+    community experiences,
+    and verified updates together in one place.
+    Plan with more confidence.
+  `
+
+  const speech =
+    new SpeechSynthesisUtterance(text)
+
+  speech.onstart = () => {
+    setIsListening(true)
+  }
+
+  speech.onend = () => {
+    setIsListening(false)
+  }
+
+  speech.onerror = () => {
+    setIsListening(false)
+  }
+
+  window.speechSynthesis.speak(speech)
+}
+   
   const values = [
     {
       icon: Accessibility,
@@ -90,11 +122,15 @@ function About() {
         <div className="about-hero-content">
 
           <span className="about-badge">
-            <CheckCircle2 size={16} />
-            Community-driven accessibility information
+            <CheckCircle2 size={16}  />
+              Community-driven accessibility information
           </span>
 
-          <h1>About AccessHub</h1>
+         <h1 className="about-hero-title">
+  <span className="hero-title-accent">
+    About AccessHub
+  </span>
+</h1>
 
           <p>
             AccessHub helps people understand how accessible a place
@@ -113,7 +149,9 @@ function About() {
             onClick={handleListen}
           >
             <Volume2 size={19} />
-            Listen to description
+            {isListening
+                  ? 'Stop listening'
+                  :  'Listen to description'}
           </button>
 
         </div>

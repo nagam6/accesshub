@@ -118,7 +118,7 @@
 
 /* Login */
 
-.login-button {
+.header-login-link{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,15 +135,31 @@
   font-weight: 700;
 
   transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.login-button:hover {
-  background-color: #005c61;
-  transform: translateY(-1px);
-}
 
+.header-account-link
+ {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  text-decoration: none;
+  font-weight: 700;
+
+    transition:
+    transform 0.2s ease,
+    opacity 0.2s ease
+    box-shadow 0.2s ease;
+}
+.header-login-link:hover,
+.header-account-link:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
 /* Responsive */
 
 @media (max-width: 1050px) {

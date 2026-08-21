@@ -37,6 +37,8 @@
 }
 
 .place-card {
+    display: flex;
+  flex-direction: column;
   overflow: hidden;
 
   border: 1px solid #dfe5e5;
@@ -59,16 +61,23 @@
 
 .place-image-wrapper {
   position: relative;
-  height: 220px;
+
+  width: 100%;
+  height: 230px;
+
+  overflow: hidden;
+  background-color: #eef3f3;
 }
 
-.place-image {
+.place-image-wrapper img {
   width: 100%;
   height: 100%;
 
   object-fit: cover;
-}
+  object-position: center;
 
+  display: block;
+}
 .verified-badge {
   position: absolute;
   left: 14px;

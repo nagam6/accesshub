@@ -44,6 +44,7 @@ function Profile() {
   logout
 } = useAuth()
   const navigate = useNavigate()
+  const [reviewCount, setReviewCount] = useState(0)
   async function handleLogout() {
   try {
 await logout()
@@ -94,19 +95,22 @@ const [submissions, setSubmissions] =
 const [loadingSubmissions, setLoadingSubmissions] =
   useState(true)
 
+// Load user profile
 useEffect(() => {
   async function loadProfile() {
-if (authLoading) {
-  return
-}
+    if (authLoading) {
+      return
+    }
 
-if (!user) {
-  navigate('/login')
-  return
-}
+    if (!user) {
+      setLoadingProfile(false)
+      navigate('/login')
+      return
+    }
 
     try {
       setLoadingProfile(true)
+      setProfileMessage('')
 
       const userRef = doc(
         db,
@@ -121,6 +125,8 @@ if (!user) {
         setProfileMessage(
           'User profile could not be found.'
         )
+
+        setLoadingProfile(false)
         return
       }
 
@@ -132,10 +138,12 @@ if (!user) {
           userData.fullName ||
           user.displayName ||
           '',
+
         email:
           userData.email ||
           user.email ||
           '',
+
         accessibilityPreferences:
           userData.accessibilityPreferences ||
           [],
@@ -143,7 +151,6 @@ if (!user) {
 
       setProfile(loadedProfile)
       setDraftProfile(loadedProfile)
-
     } catch (error) {
       console.error(
         'Error loading profile:',
@@ -160,6 +167,38 @@ if (!user) {
 
   loadProfile()
 }, [user, authLoading, navigate])
+
+
+// Load logged-in user's review count
+useEffect(() => {
+  async function loadReviewCount() {
+    if (!user?.uid) {
+      setReviewCount(0)
+      return
+    }
+
+    try {
+      const reviewsQuery = query(
+        collection(db, 'reviews'),
+        where('userId', '==', user.uid)
+      )
+
+      const snapshot =
+        await getDocs(reviewsQuery)
+
+      setReviewCount(snapshot.size)
+    } catch (error) {
+      console.error(
+        'Error loading review count:',
+        error
+      )
+
+      setReviewCount(0)
+    }
+  }
+
+  loadReviewCount()
+}, [user?.uid])
 
 
 useEffect(() => {
@@ -217,6 +256,8 @@ useEffect(() => {
 
   loadSubmissions()
 }, [user, authLoading])
+
+
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -454,7 +495,7 @@ if (authLoading || loadingProfile){
 
           <div className="profile-stat-card">
             <MessageSquareText size={22} />
-            <strong>3</strong>
+            <strong>{reviewCount}</strong>
             <span>Reviews</span>
           </div>
 

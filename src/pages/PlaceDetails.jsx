@@ -5,12 +5,13 @@ import {
   getDoc,
   collection,
   getDocs,
-  addDoc,
   query,
-  where
+  where,
+  runTransaction
 } from 'firebase/firestore'
 import { db } from '../firebase/firebase'
 import { auth } from '../firebase/firebase'
+import { showLoginToast } from '../utils/showLoginToast'
 
 import {
   ArrowLeft,
@@ -32,6 +33,7 @@ import {
   Accessibility,
   Globe,
   Bus,
+  ChevronDown,
 } from 'lucide-react'
 
 import ReviewCard from '../components/ReviewCard'
@@ -49,6 +51,8 @@ function PlaceDetails() {
 
   const { toggleFavorite, isFavorite } = useFavorites()
 
+  const [isListening, setIsListening] = useState(false)
+
   const [selectedImage, setSelectedImage] = useState(0)
 
   const [showReviewForm, setShowReviewForm] = useState(false)
@@ -58,7 +62,6 @@ function PlaceDetails() {
   const [newComment, setNewComment] = useState('')
 
   const [reportReason, setReportReason] = useState('')
-
   const [showAllReviews, setShowAllReviews] = useState(false)
   const [localReviews, setLocalReviews] = useState([])
 
@@ -83,10 +86,12 @@ function PlaceDetails() {
           return
         }
 
-        setPlace({
-          firestoreId: placeSnapshot.id,
-          ...placeSnapshot.data(),
-        })
+const placeData = placeSnapshot.data()
+
+setPlace({
+  firestoreId: placeSnapshot.id,
+  ...placeData,
+})
       } catch (error) {
         console.error(
           'Error loading place:',
@@ -144,6 +149,53 @@ useEffect(() => {
   const favorite = place
     ? isFavorite(place.id)
     : false
+
+
+function handleListen() {
+  if (!('speechSynthesis' in window)) {
+    alert(
+      'Text-to-speech is not supported in this browser.'
+    )
+    return
+  }
+
+  if (isListening) {
+    window.speechSynthesis.cancel()
+    setIsListening(false)
+    return
+  }
+
+  window.speechSynthesis.cancel()
+
+  const text = `
+    ${place.name}.
+    ${place.category} in ${place.city}.
+    Located at ${place.address || ''}.
+    Accessibility match ${place.accessibilityMatch} percent.
+    ${place.description || ''}
+    ${place.visitInfo?.entrance || ''}
+    ${place.visitInfo?.parking || ''}
+  `
+
+  const speech =
+    new SpeechSynthesisUtterance(text)
+
+  speech.onstart = () => {
+    setIsListening(true)
+  }
+
+  speech.onend = () => {
+    setIsListening(false)
+  }
+
+  speech.onerror = () => {
+    setIsListening(false)
+  }
+
+  window.speechSynthesis.speak(speech)
+}
+
+
 
   if (loadingPlace) {
   return (
@@ -204,22 +256,6 @@ useEffect(() => {
   ? localReviews
   : localReviews.slice(0, 2)
 
-  function handleListen() {
-    window.speechSynthesis.cancel()
-
-    const text = `
-      ${place.name}.
-      ${place.category} in ${place.city}.
-      Accessibility match ${place.accessibilityMatch} percent.
-    ${place.visitInfo?.entrance || ''}
-${place.visitInfo?.parking || ''}
-    `
-
-    const speech = new SpeechSynthesisUtterance(text)
-
-    window.speechSynthesis.speak(speech)
-  }
-
   async function handleShare() {
     const shareData = {
       title: place.name,
@@ -272,6 +308,11 @@ const accessibilityGroups = [
 async function handleAddReview(event) {
   event.preventDefault()
 
+  if (!auth.currentUser) {
+    showLoginToast(navigate)
+    return
+  }
+
   if (!newComment.trim()) {
     alert(
       'Please write a review before submitting.'
@@ -280,23 +321,92 @@ async function handleAddReview(event) {
   }
 
   try {
+    const ratingValue = Number(newRating)
+
     const reviewData = {
       placeId: Number(place.id),
+
       userId: auth.currentUser.uid,
-userName:
-  auth.currentUser.displayName ||
-  auth.currentUser.email ||
-  'AccessHub User',
-      rating: Number(newRating),
+
+      userName:
+        auth.currentUser.displayName ||
+        auth.currentUser.email ||
+        'AccessHub User',
+
+      ratingStars: ratingValue,
+
       visitDate:
         new Date().toISOString().split('T')[0],
+
       comment: newComment.trim(),
+
       helpful: 0,
+      helpfulUsers: [],
     }
 
-    const reviewRef = await addDoc(
-      collection(db, 'reviews'),
-      reviewData
+    const placeRef = doc(
+      db,
+      'places',
+      String(place.firestoreId || place.id)
+    )
+
+    const reviewRef = doc(
+      collection(db, 'reviews')
+    )
+
+    let updatedReviews = 0
+    let updatedRating = 0
+
+    await runTransaction(
+      db,
+      async (transaction) => {
+        const placeSnapshot =
+          await transaction.get(placeRef)
+
+        if (!placeSnapshot.exists()) {
+          throw new Error(
+            'Place does not exist.'
+          )
+        }
+
+        const placeData =
+          placeSnapshot.data()
+
+        const currentReviews =
+          Number(placeData.reviews || 0)
+
+        const currentRating =
+          Number(placeData.ratingStars || 0)
+
+        updatedReviews =
+          currentReviews + 1
+
+        updatedRating =
+          Number(
+            (
+              (
+                currentRating *
+                currentReviews
+              +
+                ratingValue
+              ) /
+              updatedReviews
+            ).toFixed(1)
+          )
+
+        transaction.set(
+          reviewRef,
+          reviewData
+        )
+
+        transaction.update(
+          placeRef,
+          {
+            reviews: updatedReviews,
+            ratingStars: updatedRating,
+          }
+        )
+      }
     )
 
     const newReview = {
@@ -309,11 +419,20 @@ userName:
       ...current,
     ])
 
+    // Update current page immediately
+    setPlace((current) => ({
+      ...current,
+      reviews: updatedReviews,
+      ratingStars: updatedRating,
+    }))
+
     setNewRating(5)
     setNewComment('')
     setShowReviewForm(false)
 
-    alert('Review submitted successfully!')
+    alert(
+      'Review submitted successfully!'
+    )
   } catch (error) {
     console.error(
       'Error adding review:',
@@ -333,9 +452,10 @@ async function handleReportInformation(event) {
     return
   }
 
-  if (!auth.currentUser) {
-    navigate('/login')
-    return
+if (!auth.currentUser) {
+  showLoginToast(navigate)
+  return
+
   }
 
   try {
@@ -462,7 +582,7 @@ async function handleReportInformation(event) {
               />
 
               <strong>
-                {place.rating}
+                {place.ratingStars}
               </strong>
 
               <span>
@@ -479,7 +599,14 @@ async function handleReportInformation(event) {
   className={`details-action-button ${
     favorite ? 'favorite-active' : ''
   }`}
-  onClick={() => toggleFavorite(place)}
+  onClick={() => {
+  if (!auth.currentUser) {
+    showLoginToast(navigate)
+    return
+  }
+
+  toggleFavorite(place)
+}}
 >
   <Heart
     size={19}
@@ -525,15 +652,17 @@ async function handleReportInformation(event) {
 
           </div>
 
-          <button
-            type="button"
-            className="listen-place-button"
-            onClick={handleListen}
-          >
-            <Volume2 size={20} />
-            Listen to place info
-          </button>
+       <button
+  type="button"
+  className="place-listen-button"
+  onClick={handleListen}
+>
+  <Volume2 size={20} />
 
+  {isListening
+    ? 'Stop listening'
+    : 'Listen to description'}
+</button>
         </section>
 
         {/* DETAILED ACCESSIBILITY */}
@@ -746,7 +875,7 @@ async function handleReportInformation(event) {
   type="button"
   onClick={() => {
   if (!auth.currentUser) {
-    navigate('/login')
+    showLoginToast(navigate)
     return
   }
 
@@ -775,8 +904,8 @@ async function handleReportInformation(event) {
         <button
   type="button"
   onClick={() => {
-  if (!auth.currentUser) {
-    navigate('/login')
+   if (!auth.currentUser) {
+    showLoginToast(navigate)
     return
   }
 
@@ -937,16 +1066,28 @@ async function handleReportInformation(event) {
               )}
 {localReviews.length > 2 && (
   <div className="show-more-reviews">
-    <button
-      type="button"
-      onClick={() =>
-        setShowAllReviews((current) => !current)
-      }
-    >
-      {showAllReviews
-        ? 'Show fewer reviews'
-        : `Show all ${localReviews.length} reviews`}
-    </button>
+<button
+  type="button"
+  className="more-reviews-button"
+  onClick={() =>
+    setShowAllReviews((current) => !current)
+  }
+>
+ <span>
+    {showAllReviews
+      ? 'Less Reviews'
+      : 'More Reviews'}
+  </span>
+
+  <ChevronDown
+    size={19}
+    className={
+      showAllReviews
+        ? 'more-reviews-icon open'
+        : 'more-reviews-icon'
+    }
+  />
+</button>
   </div>
 )}
             </div>

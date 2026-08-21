@@ -1,3 +1,6 @@
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 import {
   createBrowserRouter,
   RouterProvider
@@ -27,6 +30,7 @@ import AdminReviews from './pages/AdminReviews'
 
 import AdminRoute from './components/AdminRoute'
 import NotFound from './pages/NotFound'
+
 
 import './App.css'
 
@@ -184,7 +188,22 @@ const router = createBrowserRouter([
 
 function App() {
   return (
+    <>
     <RouterProvider router={router} />
+
+
+
+  <ToastContainer
+    position="top-center"
+    autoClose={5000}
+    hideProgressBar
+    newestOnTop
+    closeOnClick={false}
+    pauseOnHover
+    draggable
+    theme="light"
+  />
+</>
   )
 }
 

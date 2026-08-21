@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { showLoginToast } from '../utils/showLoginToast'
 
 import {
   addDoc,
@@ -83,11 +85,10 @@ async function handleSubmit(event) {
     )
     return
   }
-
-  if (!auth.currentUser) {
-    navigate('/login')
-    return
-  }
+if (!auth.currentUser) {
+  showLoginToast(navigate)
+  return
+}
 
   try {
     setSubmitting(true)
@@ -122,7 +123,12 @@ async function handleSubmit(event) {
       collection(db, 'suggestions'),
       suggestionData
     )
-
+toast.success(
+  'Suggestion submitted successfully! It has been sent to our team for review.',
+  {
+    autoClose: 4000,
+  }
+)
     setSubmitted(true)
 
     setFormData({
@@ -164,6 +170,21 @@ async function handleSubmit(event) {
             information you know.
           </p>
         </section>
+
+        {!auth.currentUser && (
+  <div className="suggest-login-notice">
+    <span>
+      Want to suggest a place? You’ll need to be logged in to submit a suggestion.
+    </span>
+
+    <button
+      type="button"
+      onClick={() => navigate('/login')}
+    >
+      Log In
+    </button>
+  </div>
+)}
 
         {submitted && (
           <div className="suggest-success">

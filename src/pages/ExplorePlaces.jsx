@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import {
   collection,
@@ -19,16 +20,29 @@ import PlaceCard from '../components/PlaceCard'
 import './ExplorePlaces.css'
 
 function ExplorePlaces() {
+  const [searchParams] = useSearchParams()
   const [places, setPlaces] = useState([])
   const [loadingPlaces, setLoadingPlaces] = useState(true)
   const [placesError, setPlacesError] = useState('')
 
-  const [searchInput, setSearchInput] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
+const initialSearch =
+  searchParams.get('search') || ''
+
+const initialCity =
+  searchParams.get('city') || ''
+
+const [searchInput, setSearchInput] =
+  useState(initialSearch)
+
+const [searchTerm, setSearchTerm] =
+  useState(initialSearch)
+
+const [selectedCity, setSelectedCity] =
+  useState(initialCity)
 
   const [showFilters, setShowFilters] = useState(false)
 
-  const [selectedCity, setSelectedCity] = useState('')
+  
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedAccessibility, setSelectedAccessibility] = useState('')
 
@@ -48,14 +62,17 @@ function ExplorePlaces() {
         const snapshot = await getDocs(
           collection(db, 'places')
         )
+const firebasePlaces = snapshot.docs.map(
+  (document) => {
+    const placeData = document.data()
 
-        const firebasePlaces = snapshot.docs.map(
-          (document) => ({
-            firestoreId: document.id,
-            ...document.data(),
-          })
-        )
-
+    return {
+      ...placeData,
+      firestoreId: document.id,
+      id: placeData.id ?? document.id,
+    }
+  }
+)
         setPlaces(firebasePlaces)
       } catch (error) {
         console.error(
@@ -203,9 +220,12 @@ function ExplorePlaces() {
         return (b.reviews || 0) - (a.reviews || 0)
       }
 
-      if (sortBy === 'highestRated') {
-        return (b.rating || 0) - (a.rating || 0)
-      }
+if (sortBy === 'highestRated') {
+  return (
+    (b.ratingStars || 0) -
+    (a.ratingStars || 0)
+  )
+}
 
       if (sortBy === 'recentlyUpdated') {
         return (

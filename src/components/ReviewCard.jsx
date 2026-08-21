@@ -1,35 +1,151 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import {
   Star,
   ThumbsUp,
   Flag
 } from 'lucide-react'
+import {
+  doc,
+  runTransaction
+} from 'firebase/firestore'
+
+import { auth, db} from '../firebase/firebase'
+import { showLoginToast } from '../utils/showLoginToast'
 
 import './ReviewCard.css'
 
-function ReviewCard({ review }) {
+function ReviewCard({ review }) 
+{
+    const navigate = useNavigate()
+
   const [helpfulCount, setHelpfulCount] = useState(review.helpful || 0)
   const [isHelpful, setIsHelpful] = useState(false)
 
-  function handleHelpful() {
-    if (isHelpful) {
-      setHelpfulCount((count) => count - 1)
-    } else {
-      setHelpfulCount((count) => count + 1)
+   useEffect(() => {
+    const uid =
+      auth.currentUser?.uid
+
+    if (!uid) {
+      setIsHelpful(false)
+      return
     }
 
-    setIsHelpful((current) => !current)
+    setIsHelpful(
+      review.helpfulUsers?.includes(uid) ||
+      false
+    )
+  }, [review.helpfulUsers])
+
+async function handleHelpful() {
+  if (!auth.currentUser) {
+    showLoginToast(navigate)
+    return
   }
 
-  function handleReport() {
-    const confirmed = window.confirm(
-      'Do you want to report this review?'
+  if (!review.firestoreId) {
+    console.error(
+      'Review Firestore ID is missing.'
+    )
+    return
+  }
+
+  try {
+    const reviewRef = doc(
+      db,
+      'reviews',
+      review.firestoreId
     )
 
-    if (confirmed) {
-      alert('Thank you. The review has been reported for moderation.')
-    }
+    const uid =
+      auth.currentUser.uid
+
+    let nextHelpful = false
+    let nextCount = helpfulCount
+
+    await runTransaction(
+      db,
+      async (transaction) => {
+        const reviewSnapshot =
+          await transaction.get(reviewRef)
+
+        if (!reviewSnapshot.exists()) {
+          throw new Error(
+            'Review not found.'
+          )
+        }
+
+        const reviewData =
+          reviewSnapshot.data()
+
+        const helpfulUsers =
+          Array.isArray(
+            reviewData.helpfulUsers
+          )
+            ? reviewData.helpfulUsers
+            : []
+
+        const alreadyHelpful =
+          helpfulUsers.includes(uid)
+
+        let updatedUsers
+
+        if (alreadyHelpful) {
+          updatedUsers =
+            helpfulUsers.filter(
+              (userId) =>
+                userId !== uid
+            )
+
+          nextHelpful = false
+        } else {
+          updatedUsers = [
+            ...helpfulUsers,
+            uid,
+          ]
+
+          nextHelpful = true
+        }
+
+        /*
+          Preserve existing seeded helpful
+          count even if helpfulUsers was
+          not present in older documents.
+        */
+        const currentCount =
+          Number(
+            reviewData.helpful || 0
+          )
+
+        nextCount = alreadyHelpful
+          ? Math.max(
+              0,
+              currentCount - 1
+            )
+          : currentCount + 1
+
+        transaction.update(
+          reviewRef,
+          {
+            helpful: nextCount,
+            helpfulUsers:
+              updatedUsers,
+          }
+        )
+      }
+    )
+
+    setHelpfulCount(nextCount)
+    setIsHelpful(nextHelpful)
+
+  } catch (error) {
+    console.error(
+      'Error updating helpful:',
+      error
+    )
   }
+}
 
   return (
     <article className="review-card">
@@ -52,7 +168,7 @@ function ReviewCard({ review }) {
                 key={star}
                 size={18}
                 fill={
-                  star <= review.rating
+                  star <= review.ratingStars
                     ? 'currentColor'
                     : 'none'
                 }
@@ -60,7 +176,7 @@ function ReviewCard({ review }) {
             ))}
 
             <strong>
-              {Number(review.rating).toFixed(1)}
+              {Number(review.ratingStars).toFixed(1)}
             </strong>
           </div>
 

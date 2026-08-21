@@ -162,6 +162,22 @@
   background-color: #ff6c48;
   transform: translateY(-2px);
 }
+.featured-section{
+  background-color:  #faf9f6;
+}
+
+.view-all-link {
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.view-all-link:hover {
+  text-decoration: none;
+  transform: translateX(3px);
+  opacity: 0.75;
+}
 
 @media (max-width: 800px) {
   .hero-section {

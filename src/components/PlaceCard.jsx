@@ -5,12 +5,16 @@ import {
   BadgeCheck,
 } from 'lucide-react'
 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { auth } from '../firebase/firebase'
+import { showLoginToast } from '../utils/showLoginToast'
+
 import './PlaceCard.css'
 import { useFavorites } from '../context/FavoritesContext'
 
 function PlaceCard({ place }) {
 
+  const navigate = useNavigate()
   const { toggleFavorite, isFavorite } = useFavorites()
   const favorite = isFavorite(place.id)
 
@@ -44,7 +48,14 @@ function PlaceCard({ place }) {
   className={`favorite-button ${
     favorite ? 'favorite-button-active' : ''
   }`}
-  onClick={() => toggleFavorite(place)}
+ onClick={() => {
+  if (!auth.currentUser) {
+    showLoginToast(navigate)
+    return
+  }
+
+  toggleFavorite(place)
+}}
   aria-label={
     favorite
       ? `Remove ${place.name} from favorites`
@@ -73,7 +84,7 @@ function PlaceCard({ place }) {
 
         <div className="place-rating">
           <Star size={18} fill="currentColor" />
-          <strong>{place.rating}</strong>
+          <strong>{place.ratingStars}</strong>
           <span>({place.reviews})</span>
         </div>
 
@@ -81,12 +92,19 @@ function PlaceCard({ place }) {
           {accessibilityCount} accessibility features
         </div>
 
-        <Link
-          to={`/places/${place.id}`}
-          className="place-details-button"
-        >
-          View Details
-        </Link>
+       <Link
+  to={`/places/${place.id}`}
+  className="place-details-button"
+  onClick={() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    })
+  }}
+>
+  View Details
+</Link>
 
       </div>
     </article>

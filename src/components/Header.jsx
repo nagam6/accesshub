@@ -8,9 +8,14 @@ import {
   Heart,
   UserRound
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import './Header.css'
 
 function Header() {
+  const {
+  user,
+  authLoading
+} = useAuth()
   return (
     <header className="site-header">
       <div className="header-container">
@@ -84,10 +89,27 @@ function Header() {
         </nav>
 
         {/* Login */}
-        <NavLink to="/login" className="login-button">
-          <UserRound size={19} />
-          <span>Log In</span>
-        </NavLink>
+        {!authLoading && (
+  <>
+    {user ? (
+      <NavLink
+        to="profile"
+        className="header-account-link"
+      >
+          <UserRound size={18} />
+        My Account
+      </NavLink>
+    ) : (
+      <NavLink
+        to="/login"
+        className="header-login-link"
+      >
+         <UserRound size={18} />
+        Log In
+      </NavLink>
+    )}
+  </>
+)}
 
       </div>
     </header>
