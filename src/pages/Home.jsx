@@ -1,5 +1,8 @@
 import { Search, MapPin, Volume2, CheckCircle2, MessageSquareText, HandHeart } from 'lucide-react'
-import homeBackgraund from '../assets/homeBackgraund.png'
+import homeBackgraund1 from '../assets/homeBackgraund1.png'
+import homeBackgraund2 from '../assets/homeBackgraund2.png'
+import homeBackgraund3 from '../assets/homeBackgraund3.png'
+
 import {
   Accessibility,
   Eye,
@@ -28,6 +31,14 @@ import { db } from '../firebase/firebase'
 import './Home.css'
 
 function Home() {
+  const heroImages = [
+  homeBackgraund1,
+  homeBackgraund2,
+  homeBackgraund3,
+]
+
+const [currentHeroImage, setCurrentHeroImage] =
+  useState(0)
   const location = useLocation()
   const navigate = useNavigate()
   const [places, setPlaces] = useState([])
@@ -42,6 +53,17 @@ const [heroSearch, setHeroSearch] = useState('')
 const [heroCity, setHeroCity] = useState('')
 const [isListening, setIsListening] = useState(false)
  const [loadingPlaces, setLoadingPlaces] = useState(true)
+
+ useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentHeroImage((current) =>
+      (current + 1) % heroImages.length
+    )
+  }, 5000)
+
+  return () => clearInterval(interval)
+}, [heroImages.length])
+
 useEffect(() => {
   if (!location.hash) {
     return
@@ -98,6 +120,24 @@ const placesData = snapshot.docs.map(
 
   loadPlaces()
 }, [])
+
+function showPreviousHeroImage() {
+  setCurrentHeroImage((current) =>
+    current === 0
+      ? heroImages.length - 1
+      : current - 1
+  )
+}
+
+function showNextHeroImage() {
+  setCurrentHeroImage((current) =>
+    current === heroImages.length - 1
+      ? 0
+      : current + 1
+  )
+}
+
+
 function handleHeroSearch() {
   const params = new URLSearchParams()
 
@@ -163,11 +203,33 @@ function handleHeroListen() {
 }
   return (
     <>
-    <section className="hero-section"
-    
-  style={{ backgroundImage: `url(${homeBackgraund})` }}>
+<section
+  className="hero-section"
+  style={{
+    backgroundImage:
+      `url(${heroImages[currentHeroImage]})`
+  }}
+>
 
       <div className="hero-overlay"></div>
+
+      <button
+  type="button"
+  className="hero-gallery-arrow hero-gallery-left"
+  onClick={showPreviousHeroImage}
+  aria-label="Previous image"
+>
+  ‹
+</button>
+
+<button
+  type="button"
+  className="hero-gallery-arrow hero-gallery-right"
+  onClick={showNextHeroImage}
+  aria-label="Next image"
+>
+  ›
+</button>
 
       <div className="hero-content">
         <h1 className="hero-title">
