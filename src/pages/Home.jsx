@@ -2,6 +2,9 @@ import { Search, MapPin, Volume2, CheckCircle2, MessageSquareText, HandHeart } f
 import homeBackgraund1 from '../assets/homeBackgraund1.png'
 import homeBackgraund2 from '../assets/homeBackgraund2.png'
 import homeBackgraund3 from '../assets/homeBackgraund3.png'
+import {
+  useAccessibility
+} from '../context/AccessibilityContext'
 
 import {
   Accessibility,
@@ -30,7 +33,8 @@ import {
 import { db } from '../firebase/firebase'
 import './Home.css'
 
-function Home() {
+function Home() 
+{
   const heroImages = [
   homeBackgraund1,
   homeBackgraund2,
@@ -39,6 +43,7 @@ function Home() {
 
 const [currentHeroImage, setCurrentHeroImage] =
   useState(0)
+  const { settings } = useAccessibility()
   const location = useLocation()
   const navigate = useNavigate()
   const [places, setPlaces] = useState([])
@@ -55,14 +60,25 @@ const [isListening, setIsListening] = useState(false)
  const [loadingPlaces, setLoadingPlaces] = useState(true)
 
  useEffect(() => {
-  const interval = setInterval(() => {
-    setCurrentHeroImage((current) =>
-      (current + 1) % heroImages.length
-    )
-  }, 5000)
+  if (settings.reduceMotion) {
+    return
+  }
 
-  return () => clearInterval(interval)
-}, [heroImages.length])
+  const interval =
+    setInterval(() => {
+      setCurrentHeroImage(
+        (current) =>
+          (current + 1) %
+          heroImages.length
+      )
+    }, 5000)
+
+  return () =>
+    clearInterval(interval)
+}, [
+  heroImages.length,
+  settings.reduceMotion
+])
 
 useEffect(() => {
   if (!location.hash) {
@@ -272,7 +288,7 @@ function handleHeroListen() {
   }
 >
   <option value="">
-    Choose city
+    All Cities
   </option>
 
   {cities.map((city) => (
