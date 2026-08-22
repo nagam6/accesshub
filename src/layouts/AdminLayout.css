@@ -1,0 +1,140 @@
+.admin-layout {
+  min-height: 100vh;
+
+  display: grid;
+  grid-template-columns: 250px 1fr;
+
+  background-color: #f5f8f8;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 28px 20px;
+
+  background-color: #0b2f3a;
+  color: #ffffff;
+}
+
+.admin-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  margin-bottom: 38px;
+}
+
+.admin-sidebar-logo {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background-color: #08777c;
+}
+
+.admin-sidebar-brand strong {
+  display: block;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+}
+
+.admin-sidebar-brand span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #91a9ae;
+
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.admin-sidebar-nav a,
+.admin-sidebar-bottom a,
+.admin-sidebar-bottom button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 13px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+  color: #b9c9cc;
+
+  text-decoration: none;
+  text-align: left;
+
+  font: inherit;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-sidebar-nav a:hover,
+.admin-sidebar-bottom a:hover,
+.admin-sidebar-bottom button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.admin-sidebar-bottom {
+  margin-top: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-layout-content {
+  min-width: 0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: relative;
+
+    width: 100%;
+    height: auto;
+  }
+
+  .admin-sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .admin-sidebar-bottom {
+    margin-top: 24px;
+  }
+}

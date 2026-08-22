@@ -192,6 +192,74 @@
   color: #ffffff;
 }
 
+.admin-password-wrapper {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  padding: 0 13px;
+
+  border-radius: 10px;
+
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.admin-password-wrapper > svg {
+  flex-shrink: 0;
+
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.admin-password-wrapper input {
+  width: 100%;
+
+  padding: 15px 42px 15px 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+  color: #ffffff;
+
+  font: inherit;
+}
+
+.admin-password-wrapper input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.admin-password-toggle {
+  position: absolute;
+
+  top: 50%;
+  right: 13px;
+
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px;
+
+  border: none;
+  background: transparent;
+
+  color: rgba(255, 255, 255, 0.68);
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.admin-password-toggle:hover {
+  color: #ffffff;
+}
+
 @media (max-width: 520px) {
   .admin-login-page {
     padding: 28px 16px;

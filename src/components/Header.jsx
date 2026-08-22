@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import {
   Accessibility,
   House,
@@ -6,14 +6,15 @@ import {
   PlusCircle,
   CircleHelp,
   Heart,
-  UserRound
+  UserRound,
+   Shield
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import './Header.css'
 
 function Header() {
   const {
-  user,
+  user,userRole,
   authLoading
 } = useAuth()
   return (
@@ -91,23 +92,30 @@ function Header() {
         {/* Login */}
         {!authLoading && (
   <>
-    {user ? (
-      <NavLink
-        to="profile"
-        className="header-account-link"
-      >
-          <UserRound size={18} />
-        My Account
-      </NavLink>
-    ) : (
-      <NavLink
-        to="/login"
-        className="header-login-link"
-      >
-         <UserRound size={18} />
-        Log In
-      </NavLink>
-    )}
+{user && userRole === 'admin' ? (
+  <Link
+    to="/admin"
+    className="header-account-link"
+  >
+    <Shield size={18} />
+    Admin Dashboard
+  </Link>
+) : user ? (
+  <Link
+    to="/profile"
+    className="header-account-link"
+  >
+    <UserRound size={18} />
+    My Account
+  </Link>
+) : (
+  <Link
+    to="/login"
+    className="header-login-link"
+  >
+    Log In
+  </Link>
+)}
   </>
 )}
 

@@ -211,17 +211,32 @@
   gap: 12px;
 }
 
-.admin-place-info img {
-  width: 55px;
-  height: 48px;
+.admin-place-image {
+  width: 72px;
+  height: 58px;
 
-  flex-shrink: 0;
+  object-fit: cover;
+  object-position: center;
+
+  border-radius: 10px;
+  display: block;
+}
+
+.admin-place-image-placeholder {
+  width: 72px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   border-radius: 10px;
 
-  object-fit: cover;
+  background-color: #eef3f3;
+  color: #728388;
 
-  background-color: #edf1f1;
+  font-size: 0.72rem;
+  text-align: center;
 }
 
 .admin-place-info > div {

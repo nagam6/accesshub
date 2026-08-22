@@ -5,6 +5,7 @@ import {
   getDoc,
   collection,
   getDocs,
+  addDoc,
   query,
   where,
   runTransaction
@@ -12,6 +13,7 @@ import {
 import { db } from '../firebase/firebase'
 import { auth } from '../firebase/firebase'
 import { showLoginToast } from '../utils/showLoginToast'
+import { toast } from 'react-toastify'
 
 import {
   ArrowLeft,
@@ -444,18 +446,20 @@ async function handleAddReview(event) {
     )
   }
 }
+
 async function handleReportInformation(event) {
   event.preventDefault()
 
-  if (!reportReason.trim()) {
-    alert('Please describe the incorrect information.')
+  if (!auth.currentUser) {
+    showLoginToast(navigate)
     return
   }
 
-if (!auth.currentUser) {
-  showLoginToast(navigate)
-  return
-
+  if (!reportReason.trim()) {
+    toast.warning(
+      'Please describe the incorrect information.'
+    )
+    return
   }
 
   try {
@@ -483,7 +487,7 @@ if (!auth.currentUser) {
       reportData
     )
 
-    alert(
+    toast.success(
       'Thank you. Your report was submitted for review.'
     )
 
@@ -495,7 +499,7 @@ if (!auth.currentUser) {
       error
     )
 
-    alert(
+    toast.error(
       'Could not submit the report. Please try again.'
     )
   }

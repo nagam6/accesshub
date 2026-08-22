@@ -207,7 +207,7 @@ function AdminReviews() {
                       />
 
                       <strong>
-                        {review.rating ?? 0}
+                        {review.ratingStars ?? 0}
                       </strong>
                     </div>
 

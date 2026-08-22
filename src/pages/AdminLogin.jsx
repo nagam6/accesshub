@@ -23,7 +23,9 @@ import {
   Shield,
   Mail,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 
 import './AdminLogin.css'
@@ -35,6 +37,7 @@ function AdminLogin() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(event) {
     
@@ -219,20 +222,37 @@ function AdminLogin() {
               Password
             </label>
 
-            <div className="admin-login-input-wrapper">
+            <div className="admin-password-wrapper">
 
               <Lock size={18} />
 
-              <input
-                id="admin-password"
-                type="password"
-                value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+           <input
+    type={showPassword ? 'text' : 'password'}
+    name="password"
+    value={password}
+    onChange={(event) =>
+      setPassword(event.target.value)
+    }
                 placeholder="••••••••"
               />
-
+<button
+    type="button"
+    className="admin-password-toggle"
+    onClick={() =>
+      setShowPassword((current) => !current)
+    }
+    aria-label={
+      showPassword
+        ? 'Hide password'
+        : 'Show password'
+    }
+  >
+    {showPassword ? (
+      <EyeOff size={19} />
+    ) : (
+      <Eye size={19} />
+    )}
+  </button>
             </div>
 
           </div>

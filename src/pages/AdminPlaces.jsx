@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 
 import {useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 import {
   collection,
@@ -83,17 +84,9 @@ const filteredPlaces = useMemo(() => {
   })
 }, [searchTerm, firebasePlaces])
 
-
 async function handleDeletePlace(place) {
-  if (place.source !== 'firebase') {
-    alert(
-      'This is a mock place. It will become editable after we move the original places to Firebase.'
-    )
-    return
-  }
-
   const confirmed = window.confirm(
-    `Are you sure you want to delete "${place.name}"?`
+    `Delete ${place.name}?`
   )
 
   if (!confirmed) {
@@ -101,63 +94,89 @@ async function handleDeletePlace(place) {
   }
 
   try {
-    await deleteDoc(
-      doc(db, 'places', place.id)
+    const placeId =
+      place.firestoreId || String(place.id)
+
+    const placeRef = doc(
+      db,
+      'places',
+      placeId
     )
 
-    setFirebasePlaces((currentPlaces) =>
-      currentPlaces.filter(
-        (currentPlace) => currentPlace.id !== place.id
+    await deleteDoc(placeRef)
+
+    setFirebasePlaces((current) =>
+      current.filter(
+        (item) =>
+          (item.firestoreId || String(item.id)) !==
+          placeId
       )
     )
 
-    alert('Place deleted successfully.')
+    toast.success(
+      `${place.name} was deleted successfully.`
+    )
   } catch (error) {
-    console.error('Error deleting place:', error)
+    console.error(
+      'Error deleting place:',
+      error
+    )
 
-    alert('Could not delete the place. Please try again.')
+    toast.error(
+      'Could not delete the place. Please try again.'
+    )
   }
 }
 
 async function handleToggleVerified(place) {
-  if (place.source !== 'firebase') {
-    alert(
-      'This is a mock place. It will become editable after we move the original places to Firebase.'
-    )
-    return
-  }
-
   try {
-    const newVerifiedStatus = !place.verified
+    const placeId =
+      place.firestoreId || String(place.id)
 
-    await updateDoc(
-      doc(db, 'places', place.id),
-      {
-        verified: newVerifiedStatus,
-      }
+    const placeRef = doc(
+      db,
+      'places',
+      placeId
     )
 
-    setFirebasePlaces((currentPlaces) =>
-      currentPlaces.map((currentPlace) =>
-        currentPlace.id === place.id
+    const newVerified =
+      !place.verified
+
+    await updateDoc(placeRef, {
+      verified: newVerified,
+    })
+
+    setFirebasePlaces((current) =>
+      current.map((item) =>
+        (item.firestoreId || String(item.id)) ===
+        placeId
           ? {
-              ...currentPlace,
-              verified: newVerifiedStatus,
+              ...item,
+              verified: newVerified,
             }
-          : currentPlace
+          : item
       )
+    )
+
+    toast.success(
+      newVerified
+        ? `${place.name} is now verified.`
+        : `${place.name} is now unverified.`
     )
   } catch (error) {
     console.error(
-      'Error updating verification:',
+      'Error updating verified status:',
       error
     )
 
-    alert(
-      'Could not update the verification status.'
+    toast.error(
+      'Could not update verification status.'
     )
   }
 }
+    
+
+
 
   return (
     <main className="admin-places-page">
@@ -241,19 +260,22 @@ async function handleToggleVerified(place) {
 
                 <tbody>
                   {filteredPlaces.map((place) => (
-                    <tr key={place.firebaseId}>
+                    <tr key={place.firestoreId || place.id}>
 
                       <td>
                         <div className="admin-place-info">
 
-                          <img
-                            src={
-                              Array.isArray(place.image)
-                                ? place.image[0]
-                                : place.image
-                            }
-                            alt=""
-                          />
+                        {place.images?.[0] ? (
+  <img
+    src={place.images[0]}
+    alt={place.name}
+    className="admin-place-image"
+  />
+) : (
+  <div className="admin-place-image-placeholder">
+    No image
+  </div>
+)}
 
                           <div>
                             <strong>
@@ -281,7 +303,7 @@ async function handleToggleVerified(place) {
 
                       <td>
                         <strong>
-                          {place.rating ?? '—'}
+                          {place.ratingStars ?? '—'}
                         </strong>
                       </td>
 
@@ -310,15 +332,15 @@ async function handleToggleVerified(place) {
                       <td>
                         <div className="admin-place-actions">
 
-                          <Link
-                            to={`/places/${place.id}`}
-                            className="admin-icon-button"
-                            aria-label={`View ${place.name}`}
-                            title="View place"
-                          >
-                            <Eye size={17} />
-                          </Link>
-
+                    <Link
+  to={`/places/${place.id}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="admin-icon-button"
+  aria-label={`View ${place.name}`}
+>
+  <Eye size={18} />
+</Link>
                           <Link
                             to={`/admin/places/${place.id}/edit`}
                             className="admin-icon-button"
@@ -330,17 +352,17 @@ async function handleToggleVerified(place) {
 
                          <button
   type="button"
-  className="admin-icon-button verify"
+  className={`admin-icon-button verify ${ place.verified ? 'verified' : ''}`}
   onClick={() => handleToggleVerified(place)}
-  aria-label={
+    aria-label={
     place.verified
       ? `Unverify ${place.name}`
       : `Verify ${place.name}`
-  }
-  title={
+    }
+      title={
     place.verified
-      ? 'Unverify'
-      : 'Verify'
+      ? 'Unverify place'
+      : 'Verify place'
   }
 >
   <BadgeCheck size={17} />
@@ -350,8 +372,6 @@ async function handleToggleVerified(place) {
   type="button"
   className="admin-icon-button delete"
   onClick={() => handleDeletePlace(place)}
-  aria-label={`Delete ${place.name}`}
-  title="Delete place"
 >
   <Trash2 size={17} />
 </button>

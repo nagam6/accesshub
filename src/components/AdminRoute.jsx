@@ -1,77 +1,33 @@
-import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-
-import {
-  doc,
-  getDoc
-} from 'firebase/firestore'
-
-import {
-  auth,
-  db
-} from '../firebase/firebase'
+import { useAuth } from '../context/AuthContext'
 
 function AdminRoute({ children }) {
-  const [checking, setChecking] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const {
+    user,
+    userRole,
+    authLoading
+  } = useAuth()
 
-  useEffect(() => {
-    async function checkAdmin() {
-      const user = auth.currentUser
-
-      if (!user) {
-        setIsAdmin(false)
-        setChecking(false)
-        return
-      }
-
-      try {
-        const userSnapshot = await getDoc(
-          doc(
-            db,
-            'users',
-            user.uid
-          )
-        )
-
-        if (!userSnapshot.exists()) {
-          setIsAdmin(false)
-          return
-        }
-
-        const userData =
-          userSnapshot.data()
-
-        const role =
-          String(userData.role || '')
-            .trim()
-            .toLowerCase()
-
-        setIsAdmin(role === 'admin')
-      } catch (error) {
-        console.error(
-          'Admin route check error:',
-          error
-        )
-
-        setIsAdmin(false)
-      } finally {
-        setChecking(false)
-      }
-    }
-
-    checkAdmin()
-  }, [])
-
-  if (checking) {
+  // Wait until Firebase restores the session
+  if (authLoading) {
     return (
-      <div style={{ padding: '40px' }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1rem',
+          color: '#173843',
+        }}
+      >
         Checking administrator access...
       </div>
     )
   }
 
-  if (!auth.currentUser) {
+  // Not logged in
+  if (!user) {
     return (
       <Navigate
         to="/admin-login"
@@ -80,7 +36,8 @@ function AdminRoute({ children }) {
     )
   }
 
-  if (!isAdmin) {
+  // Logged in, but not an admin
+  if (userRole !== 'admin') {
     return (
       <Navigate
         to="/"
@@ -89,6 +46,7 @@ function AdminRoute({ children }) {
     )
   }
 
+  // Valid admin
   return children
 }
 

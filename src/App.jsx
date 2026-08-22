@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 
 import AppLayout from './layouts/AppLayout'
+import AdminLayout from './layouts/AdminLayout'
 
 import Home from './pages/Home'
 import ExplorePlaces from './pages/ExplorePlaces'
@@ -19,8 +20,8 @@ import About from './pages/About'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
-import AdminLogin from './pages/AdminLogin'
 
+import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminPlaces from './pages/AdminPlaces'
 import AdminPlaceForm from './pages/AdminPlaceForm'
@@ -30,7 +31,6 @@ import AdminReviews from './pages/AdminReviews'
 
 import AdminRoute from './components/AdminRoute'
 import NotFound from './pages/NotFound'
-
 
 import './App.css'
 
@@ -48,32 +48,26 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-
       {
         path: 'places',
         element: <ExplorePlaces />,
       },
-
       {
         path: 'places/:id',
         element: <PlaceDetails />,
       },
-
       {
         path: 'suggest-place',
         element: <SuggestPlace />,
       },
-
       {
         path: 'favorites',
         element: <Favorites />,
       },
-
       {
         path: 'profile',
         element: <Profile />,
       },
-
       {
         path: 'about',
         element: <About />,
@@ -117,63 +111,39 @@ const router = createBrowserRouter([
     path: '/admin',
     element: (
       <AdminRoute>
-        <AdminDashboard />
+        <AdminLayout />
       </AdminRoute>
     ),
-  },
-
-  {
-    path: '/admin/places',
-    element: (
-      <AdminRoute>
-        <AdminPlaces />
-      </AdminRoute>
-    ),
-  },
-
-  {
-    path: '/admin/places/new',
-    element: (
-      <AdminRoute>
-        <AdminPlaceForm />
-      </AdminRoute>
-    ),
-  },
-
-  {
-    path: '/admin/places/:id/edit',
-    element: (
-      <AdminRoute>
-        <AdminPlaceForm />
-      </AdminRoute>
-    ),
-  },
-
-  {
-    path: '/admin/suggestions',
-    element: (
-      <AdminRoute>
-        <AdminSuggestions />
-      </AdminRoute>
-    ),
-  },
-
-  {
-    path: '/admin/reports',
-    element: (
-      <AdminRoute>
-        <AdminReports />
-      </AdminRoute>
-    ),
-  },
-
-  {
-    path: '/admin/reviews',
-    element: (
-      <AdminRoute>
-        <AdminReviews />
-      </AdminRoute>
-    ),
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: 'places',
+        element: <AdminPlaces />,
+      },
+      {
+        path: 'places/new',
+        element: <AdminPlaceForm />,
+      },
+      {
+        path: 'places/:id/edit',
+        element: <AdminPlaceForm />,
+      },
+      {
+        path: 'suggestions',
+        element: <AdminSuggestions />,
+      },
+      {
+        path: 'reports',
+        element: <AdminReports />,
+      },
+      {
+        path: 'reviews',
+        element: <AdminReviews />,
+      },
+    ],
   },
 
   /* =========================
@@ -189,21 +159,19 @@ const router = createBrowserRouter([
 function App() {
   return (
     <>
-    <RouterProvider router={router} />
+      <RouterProvider router={router} />
 
-
-
-  <ToastContainer
-    position="top-center"
-    autoClose={5000}
-    hideProgressBar
-    newestOnTop
-    closeOnClick={false}
-    pauseOnHover
-    draggable
-    theme="light"
-  />
-</>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick={false}
+        pauseOnHover
+        draggable
+        theme="light"
+      />
+    </>
   )
 }
 
