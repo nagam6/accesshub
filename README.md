@@ -1,16 +1,86 @@
-# React + Vite
+# AccessHub ♿
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AccessHub is an accessibility-focused web application that helps users discover public places based on their accessibility needs.
 
-Currently, two official plugins are available:
+Users can explore places, review accessibility information, save favorites, share reviews, report incorrect information, and suggest new locations. Administrators can manage and verify platform content through a protected admin dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Features
 
-## React Compiler
+### For Users
+- Browse and search accessible places
+- Filter places by accessibility needs
+- View detailed accessibility information
+- Save favorite places
+- Submit ratings and reviews
+- Report incorrect or outdated information
+- Suggest new places
+- Manage accessibility preferences
+- Text-to-speech support
+- Responsive desktop, tablet, and mobile experience
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### For Administrators
+- Secure administrator authentication
+- Add and edit places
+- Verify accessibility information
+- Delete places
+- Manage user reviews
+- Review community reports
+- Approve or reject place suggestions
 
-## Expanding the ESLint configuration
+## 📸 Screenshots
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Home Page
+
+![AccessHub Home Page](./src/assets/home.jpg)
+
+### Explore Places
+
+![Explore Places](./src/assets/explore.jpg)
+
+### Place Details
+
+![Place Details](./src/assets/place-details.jpg)
+
+### Mobile Experience
+
+<p align="center">
+  <img src="./src/assets/mobile-home.jpg" width="280" alt="AccessHub mobile home page" />
+  &nbsp;&nbsp;
+  <img src="./scre/assets/mobile-place.jpg" width="280" alt="AccessHub mobile place details page" />
+</p>
+
+## 🛠️ Technologies
+
+- React
+- Vite
+- React Router
+- Firebase Authentication
+- Cloud Firestore
+- Lucide React
+- React Toastify
+- CSS
+
+## 🔐 Authentication & Security
+
+AccessHub uses Firebase Authentication for user and administrator authentication.
+
+Firestore Security Rules protect application data and restrict administrative operations based on authenticated user roles.
+
+Regular users are assigned the `user` role, while administrative functionality requires an authenticated account with the `admin` role.
+
+## ♿ Accessibility
+
+Accessibility is a core part of AccessHub.
+
+The interface includes support for:
+
+- Keyboard navigation
+- Visible focus states
+- Readable color contrast
+- Responsive layouts
+- Screen-reader-friendly structure
+- Accessibility preference selection
+- Text-to-speech functionality
+- Mobility, vision, hearing, sensory, restroom, and parking accessibility information
+
+## 🚀 Getting Started
