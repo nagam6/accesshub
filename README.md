@@ -46,7 +46,7 @@ Users can explore places, review accessibility information, save favorites, shar
 <p align="center">
   <img src="./src/assets/mobile-home.jpg" width="280" alt="AccessHub mobile home page" />
   &nbsp;&nbsp;
-  <img src="./scre/assets/mobile-place.jpg" width="280" alt="AccessHub mobile place details page" />
+  <img src="./scr/assets/mobile-place.jpg" width="280" alt="AccessHub mobile place details page" />
 </p>
 
 ## 🛠️ Technologies
@@ -84,3 +84,6 @@ The interface includes support for:
 - Mobility, vision, hearing, sensory, restroom, and parking accessibility information
 
 ## 🚀 Getting Started
+
+```bash
+git clone YOUR_REPOSITORY_URL
