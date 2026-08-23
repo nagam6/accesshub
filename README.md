@@ -46,7 +46,7 @@ Users can explore places, review accessibility information, save favorites, shar
 <p align="center">
   <img src="./src/assets/mobile-home.jpg" width="280" alt="AccessHub mobile home page" />
   &nbsp;&nbsp;
-  <img src="./scr/assets/mobile-place.jpg" width="280" alt="AccessHub mobile place details page" />
+  <img src="./src/assets/mobile-place.jpg" width="280" alt="AccessHub mobile place details page" />
 </p>
 
 ## 🛠️ Technologies
