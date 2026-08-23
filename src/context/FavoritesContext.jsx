@@ -2,109 +2,101 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState
+  useState,
 } from 'react'
-
 import {
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
-  setDoc
+  setDoc,
 } from 'firebase/firestore'
+import { toast } from 'react-toastify'
 
-import {
-  onAuthStateChanged
-} from 'firebase/auth'
-
-import {
-  auth,
-  db
-} from '../firebase/firebase'
+import { useAuth } from './AuthContext'
+import { db } from '../firebase/firebase'
 
 const FavoritesContext = createContext()
 
 export function FavoritesProvider({ children }) {
+  const { user, authLoading } = useAuth()
+
   const [favorites, setFavorites] = useState([])
   const [loadingFavorites, setLoadingFavorites] =
     useState(true)
 
-function getPlaceId(place) {
-  return String(place.id)
-}
+  function getPlaceId(place) {
+    return String(place.id)
+  }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (user) => {
-        if (!user) {
-          setFavorites([])
-          setLoadingFavorites(false)
-          return
-        }
-
-        try {
-          setLoadingFavorites(true)
-
-          const snapshot = await getDocs(
-            collection(
-              db,
-              'users',
-              user.uid,
-              'favorites'
-            )
-          )
-
-          const loadedFavorites = []
-
-          for (const favoriteDoc of snapshot.docs) {
-            const favoriteData =
-              favoriteDoc.data()
-
-            const placeId = String(
-              favoriteData.placeId
-            )
-
-            const placeSnapshot =
-              await getDoc(
-                doc(
-                  db,
-                  'places',
-                  placeId
-                )
-              )
-
-            if (placeSnapshot.exists()) {
-              loadedFavorites.push({
-                ...placeSnapshot.data(),
-                id: placeSnapshot.id,
-              })
-            }
-          }
-
-          setFavorites(loadedFavorites)
-        } catch (error) {
-          console.error(
-            'Error loading favorites:',
-            error
-          )
-
-          setFavorites([])
-        } finally {
-          setLoadingFavorites(false)
-        }
+    async function loadFavorites() {
+      if (authLoading) {
+        return
       }
-    )
 
-    return unsubscribe
-  }, [])
+      if (!user) {
+        setFavorites([])
+        setLoadingFavorites(false)
+        return
+      }
+
+      try {
+        setLoadingFavorites(true)
+
+        const snapshot = await getDocs(
+          collection(
+            db,
+            'users',
+            user.uid,
+            'favorites'
+          )
+        )
+
+        const loadedFavorites = []
+
+        for (const favoriteDoc of snapshot.docs) {
+          const favoriteData = favoriteDoc.data()
+          const placeId = String(
+            favoriteData.placeId
+          )
+
+          const placeSnapshot = await getDoc(
+            doc(
+              db,
+              'places',
+              placeId
+            )
+          )
+
+          if (placeSnapshot.exists()) {
+            loadedFavorites.push({
+              ...placeSnapshot.data(),
+              id: placeSnapshot.id,
+            })
+          }
+        }
+
+        setFavorites(loadedFavorites)
+      } catch (error) {
+        console.error(
+          'Error loading favorites:',
+          error
+        )
+
+        setFavorites([])
+      } finally {
+        setLoadingFavorites(false)
+      }
+    }
+
+    loadFavorites()
+  }, [user, authLoading])
 
   async function toggleFavorite(place) {
-    const user = auth.currentUser
-
     if (!user) {
-      alert(
+      toast.info(
         'Please log in to save places to your favorites.'
       )
       return
@@ -121,10 +113,9 @@ function getPlaceId(place) {
         place
       )
 
-      alert(
+      toast.error(
         'This place could not be saved because its ID is missing.'
       )
-
       return
     }
 
@@ -175,7 +166,7 @@ function getPlaceId(place) {
         error
       )
 
-      alert(
+      toast.error(
         'Could not update your favorites.'
       )
     }

@@ -1,6 +1,4 @@
-/* =========================
-   TEXT SIZE
-========================= */
+/* Text size */
 
 html[data-text-size='small'] {
   font-size: 14px;
@@ -18,49 +16,28 @@ html[data-text-size='x-large'] {
   font-size: 20px;
 }
 
-html.access-high-contrast
-.accessibility-floating-button {
-  background-color: #00e5e5 !important;
-  color: #000000 !important;
-  border: 2px solid #ffffff !important;
-}
-/* =========================
-   GRAYSCALE
-========================= */
+/* Grayscale */
 
 html.access-grayscale .site-visual-content {
   filter: grayscale(100%);
 }
-html.access-grayscale
-.accessibility-floating-button {
+
+html.access-grayscale .accessibility-floating-button {
   background-color: #666666 !important;
   color: #ffffff !important;
 }
 
-/* =========================
-   HIGH CONTRAST
-========================= */
+/* High contrast */
 
-/* Main website background */
 html.access-high-contrast .site-visual-content {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
 
-
-/* =========================
-   MAIN PAGE SECTIONS
-========================= */
-
 html.access-high-contrast .site-visual-content main,
 html.access-high-contrast .site-visual-content section {
   background-color: #000000 !important;
 }
-
-
-/* =========================
-   HEADER + FOOTER
-========================= */
 
 html.access-high-contrast .site-header,
 html.access-high-contrast .site-footer {
@@ -69,27 +46,13 @@ html.access-high-contrast .site-footer {
   border-color: #ffffff !important;
 }
 
-
-/* =========================
-   MAIN PAGE TEXT
-   Only text outside cards/forms
-========================= */
-
 html.access-high-contrast .site-visual-content > main h1,
 html.access-high-contrast .site-visual-content > main h2,
 html.access-high-contrast .site-visual-content > main h3,
-html.access-high-contrast .site-visual-content > main h4 {
-  color: #ffffff;
-}
-
+html.access-high-contrast .site-visual-content > main h4,
 html.access-high-contrast .site-visual-content > main p {
   color: #ffffff;
 }
-
-
-/* =========================
-   SECTION HEADINGS
-========================= */
 
 html.access-high-contrast .section-label {
   color: #00e5e5 !important;
@@ -108,59 +71,40 @@ html.access-high-contrast .explore-heading p {
   color: #ffffff !important;
 }
 
-
-/* =========================
-   CARDS
-   Keep original light backgrounds
-========================= */
+/* Cards */
 
 html.access-high-contrast
-.site-visual-content
-[class*="card"] {
+  .site-visual-content
+  [class*='card'] {
   color: #000000;
 }
 
-/* Text inside light cards */
-
 html.access-high-contrast
-.site-visual-content
-[class*="card"] h1,
-
+  .site-visual-content
+  [class*='card'] h1,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] h2,
-
+  .site-visual-content
+  [class*='card'] h2,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] h3,
-
+  .site-visual-content
+  [class*='card'] h3,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] h4,
-
+  .site-visual-content
+  [class*='card'] h4,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] p,
-
+  .site-visual-content
+  [class*='card'] p,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] span,
-
+  .site-visual-content
+  [class*='card'] span,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] strong,
-
+  .site-visual-content
+  [class*='card'] strong,
 html.access-high-contrast
-.site-visual-content
-[class*="card"] label {
+  .site-visual-content
+  [class*='card'] label {
   color: #000000 !important;
 }
-
-
-/* =========================
-   DARK CARDS / SECTIONS
-   Exceptions
-========================= */
 
 html.access-high-contrast .profile-details-card,
 html.access-high-contrast .about-cta-card,
@@ -176,60 +120,45 @@ html.access-high-contrast .profile-details-card p,
 html.access-high-contrast .profile-details-card span,
 html.access-high-contrast .profile-details-card strong,
 html.access-high-contrast .profile-details-card label,
-
 html.access-high-contrast .about-cta-card h2,
 html.access-high-contrast .about-cta-card p {
   color: #ffffff !important;
 }
 
+/* Forms */
 
-/* =========================
-   INPUTS + FORMS
-========================= */
-
-html.access-high-contrast
-.site-visual-content input,
-
-html.access-high-contrast
-.site-visual-content select,
-
-html.access-high-contrast
-.site-visual-content textarea {
+html.access-high-contrast .site-visual-content input,
+html.access-high-contrast .site-visual-content select,
+html.access-high-contrast .site-visual-content textarea {
   background-color: #ffffff !important;
   color: #000000 !important;
-
   border: 2px solid #ffffff !important;
 }
 
 html.access-high-contrast
-.site-visual-content input::placeholder,
-
+  .site-visual-content
+  input::placeholder,
 html.access-high-contrast
-.site-visual-content textarea::placeholder {
+  .site-visual-content
+  textarea::placeholder {
   color: #555555 !important;
 }
 
-
-/* Disabled/profile fields */
-
 html.access-high-contrast
-.site-visual-content input:disabled,
-
+  .site-visual-content
+  input:disabled,
 html.access-high-contrast
-.site-visual-content textarea:disabled {
+  .site-visual-content
+  textarea:disabled {
   background-color: #eeeeee !important;
   color: #000000 !important;
   opacity: 1 !important;
 }
 
-
-/* =========================
-   HERO SEARCH
-========================= */
+/* Hero search */
 
 html.access-high-contrast .search-box {
   background-color: #080808 !important;
-
   border: 2px solid #ffffff !important;
 }
 
@@ -242,19 +171,16 @@ html.access-high-contrast .search-field input,
 html.access-high-contrast .search-field select {
   background-color: #111111 !important;
   color: #ffffff !important;
-
   border: none !important;
 }
 
 html.access-high-contrast
-.search-field input::placeholder {
+  .search-field
+  input::placeholder {
   color: #dddddd !important;
 }
 
-
-/* =========================
-   BUTTONS
-========================= */
+/* Buttons and links */
 
 html.access-high-contrast .search-button {
   background-color: #00e5e5 !important;
@@ -268,37 +194,30 @@ html.access-high-contrast .about-primary-button {
   color: #000000 !important;
 }
 
-
-/* White buttons */
-
 html.access-high-contrast
-.site-visual-content button {
+  .site-visual-content
+  button {
   border-color: #ffffff;
 }
 
-
-/* =========================
-   LINKS + ACCENTS
-========================= */
-
 html.access-high-contrast
-.site-visual-content a {
+  .site-visual-content
+  a {
   color: #00e5e5;
 }
 
 html.access-high-contrast .hero-title-accent,
 html.access-high-contrast .view-all-link,
-html.access-high-contrast .place-accessibility-summary {
+html.access-high-contrast
+  .place-accessibility-summary {
   color: #00e5e5 !important;
 }
 
-
-/* =========================
-   PLACE / STATUS BADGES
-========================= */
+/* Status */
 
 html.access-high-contrast .verified-badge,
-html.access-high-contrast .details-verified-badge {
+html.access-high-contrast
+  .details-verified-badge {
   background-color: #00e5e5 !important;
   color: #000000 !important;
 }
@@ -318,11 +237,6 @@ html.access-high-contrast .status-unknown {
   color: #000000 !important;
 }
 
-
-/* =========================
-   ICON BOXES
-========================= */
-
 html.access-high-contrast .value-icon,
 html.access-high-contrast .step-icon,
 html.access-high-contrast .impact-icon {
@@ -330,10 +244,7 @@ html.access-high-contrast .impact-icon {
   color: #007f86 !important;
 }
 
-
-/* =========================
-   PROFILE
-========================= */
+/* Profile */
 
 html.access-high-contrast .profile-page {
   background-color: #000000 !important;
@@ -348,147 +259,136 @@ html.access-high-contrast .profile-stat-card {
   background-color: #ffffff !important;
 }
 
-html.access-high-contrast .profile-stat-card strong,
-html.access-high-contrast .profile-stat-card span {
+html.access-high-contrast
+  .profile-stat-card
+  strong,
+html.access-high-contrast
+  .profile-stat-card
+  span {
   color: #000000 !important;
 }
 
-
-/* =========================
-   FLOATING ACCESSIBILITY BUTTON
-========================= */
-
 html.access-high-contrast
-.accessibility-floating-button {
-  background-color: #00e5e5 !important;
-  color: #000000 !important;
-
-  border: 2px solid #ffffff !important;
-}
-
-
-/* =========================
-   DO NOT CHANGE THE PANEL
-========================= */
-
+  .site-visual-content
+  .profile-card
+  .profile-main
+  h2,
 html.access-high-contrast
-.accessibility-panel {
-  background-color: #ffffff !important;
-  color: #173843 !important;
-
-  border-color: #dce5e5 !important;
+  .site-visual-content
+  .profile-card
+  .profile-main
+  p {
+  color: #ffffff !important;
 }
 
 html.access-high-contrast
-.accessibility-panel h2,
-
-html.access-high-contrast
-.accessibility-panel h3,
-
-html.access-high-contrast
-.accessibility-panel strong {
-  color: #173843 !important;
+  .site-visual-content
+  .profile-card
+  .profile-main
+  p
+  svg {
+  color: #00e5e5 !important;
 }
 
 html.access-high-contrast
-.accessibility-panel p,
-
-html.access-high-contrast
-.accessibility-panel span {
-  color: #66797e !important;
+  .site-visual-content
+  .profile-card
+  .profile-avatar {
+  color: #ffffff !important;
 }
 
+/* Suggest place */
 
-/* Keep active toggle teal */
-
-html.access-high-contrast
-.accessibility-panel
-.accessibility-option.active
-.accessibility-toggle {
-  background-color: #08777c !important;
-}
-
-
-/* =========================
-   FOCUS
-========================= */
-
-html.access-high-contrast
-.site-visual-content button:focus-visible,
-
-html.access-high-contrast
-.site-visual-content a:focus-visible,
-
-html.access-high-contrast
-.site-visual-content input:focus-visible,
-
-html.access-high-contrast
-.site-visual-content select:focus-visible,
-
-html.access-high-contrast
-.site-visual-content textarea:focus-visible {
-  outline: 3px solid #00ffff !important;
-  outline-offset: 3px;
-}
-
-/* =========================
-   REDUCE MOTION
-========================= */
-
-html.access-reduce-motion *,
-html.access-reduce-motion *::before,
-html.access-reduce-motion *::after {
-  scroll-behavior: auto !important;
-
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-
-  transition-duration: 0.01ms !important;
-}
-/* =========================
-   SUGGEST PLACE SUBMIT AREA
-========================= */
-
-html.access-high-contrast
-.suggest-submit-area {
+html.access-high-contrast .suggest-submit-area {
   background-color: #e4f3f1 !important;
   color: #000000 !important;
 }
 
 html.access-high-contrast
-.suggest-submit-area p {
+  .suggest-submit-area
+  p {
   color: #000000 !important;
 }
 
 html.access-high-contrast
-.suggest-submit-button {
+  .suggest-submit-button {
   background-color: #00e5e5 !important;
   color: #000000 !important;
   border-color: #00e5e5 !important;
 }
-/* =========================
-   PROFILE CARD FIX
-========================= */
+
+/* Accessibility controls */
 
 html.access-high-contrast
-.profile-card {
-  color: #ffffff !important;
+  .accessibility-floating-button {
+  background-color: #00e5e5 !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
 }
 
 html.access-high-contrast
-.site-visual-content
-.profile-card .profile-main h2 {
-  color: #ffffff !important;
+  .accessibility-panel {
+  background-color: #ffffff !important;
+  color: #173843 !important;
+  border-color: #dce5e5 !important;
 }
 
 html.access-high-contrast
-.site-visual-content
-.profile-card .profile-main p {
-  color: #ffffff !important;
+  .accessibility-panel
+  h2,
+html.access-high-contrast
+  .accessibility-panel
+  h3,
+html.access-high-contrast
+  .accessibility-panel
+  strong {
+  color: #173843 !important;
 }
 
 html.access-high-contrast
-.site-visual-content
-.profile-card .profile-main p svg {
-  color: #00e5e5 !important;
+  .accessibility-panel
+  p,
+html.access-high-contrast
+  .accessibility-panel
+  span {
+  color: #66797e !important;
+}
+
+html.access-high-contrast
+  .accessibility-panel
+  .accessibility-option.active
+  .accessibility-toggle {
+  background-color: #08777c !important;
+}
+
+/* Focus */
+
+html.access-high-contrast
+  .site-visual-content
+  button:focus-visible,
+html.access-high-contrast
+  .site-visual-content
+  a:focus-visible,
+html.access-high-contrast
+  .site-visual-content
+  input:focus-visible,
+html.access-high-contrast
+  .site-visual-content
+  select:focus-visible,
+html.access-high-contrast
+  .site-visual-content
+  textarea:focus-visible {
+  outline: 3px solid #00ffff !important;
+  outline-offset: 3px;
+}
+
+/* Reduce motion */
+
+html.access-reduce-motion *,
+html.access-reduce-motion *::before,
+html.access-reduce-motion *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

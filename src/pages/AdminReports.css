@@ -15,9 +15,7 @@
 
 .admin-reports-heading h1 {
   margin: 7px 0 10px;
-
   color: #102f3e;
-
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(2.3rem, 4vw, 3.4rem);
 }
@@ -34,18 +32,16 @@
 
 .admin-report-card {
   padding: 24px;
-
   border: 1px solid #dce5e5;
   border-radius: 18px;
-
   background-color: #ffffff;
 }
 
 .admin-report-top {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  align-items: flex-start;
 }
 
 .admin-report-title {
@@ -55,6 +51,7 @@
 }
 
 .admin-report-title svg {
+  flex-shrink: 0;
   color: #b45c4f;
 }
 
@@ -72,9 +69,7 @@
 .admin-report-reason {
   margin-top: 20px;
   padding: 18px;
-
   border-radius: 14px;
-
   background-color: #f8fbfb;
 }
 
@@ -86,14 +81,14 @@
   margin: 8px 0 0;
   color: #62767b;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .admin-report-footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 18px;
-
   margin-top: 18px;
 }
 
@@ -111,12 +106,10 @@
 .report-dismiss-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-
   padding: 10px 15px;
-
   border-radius: 10px;
-
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -138,12 +131,11 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-
   padding: 7px 10px;
   border-radius: 999px;
-
   font-size: 0.78rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .report-status.open {
@@ -163,23 +155,43 @@
 
 .admin-reports-empty {
   padding: 50px;
-
   border: 1px solid #dce5e5;
   border-radius: 18px;
-
   background-color: #ffffff;
-
-  text-align: center;
   color: #6d8085;
+  text-align: center;
 }
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .admin-reports-page {
+    padding: 40px 24px 80px;
+  }
+
+  .admin-report-card {
+    padding: 22px;
+  }
+}
+
+/* Mobile */
 
 @media (max-width: 650px) {
   .admin-reports-page {
     padding: 32px 18px 65px;
   }
 
+  .admin-reports-heading h1 {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .admin-report-card {
+    padding: 20px;
+  }
+
   .admin-report-top,
   .admin-report-footer {
+    align-items: flex-start;
     flex-direction: column;
   }
 
@@ -190,7 +202,10 @@
 
   .report-resolve-button,
   .report-dismiss-button {
-    justify-content: center;
     width: 100%;
+  }
+
+  .admin-reports-empty {
+    padding: 38px 20px;
   }
 }

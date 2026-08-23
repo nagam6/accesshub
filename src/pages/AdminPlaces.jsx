@@ -7,17 +7,16 @@ import {
   PlusCircle,
   Search,
   ShieldOff,
-  Trash2
+  Trash2,
 } from 'lucide-react'
-
-import {useEffect, useMemo, useState } from 'react'
-import { toast } from 'react-toastify'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import {
   collection,
-  getDocs,
   deleteDoc,
   doc,
+  getDocs,
   updateDoc,
 } from 'firebase/firestore'
 
@@ -26,157 +25,155 @@ import { db } from '../firebase/firebase'
 import './AdminPlaces.css'
 
 function AdminPlaces() {
-
   const [searchTerm, setSearchTerm] = useState('')
   const [firebasePlaces, setFirebasePlaces] = useState([])
   const [loading, setLoading] = useState(true)
 
-useEffect(() => {
-  async function fetchPlaces() {
+  useEffect(() => {
+    async function fetchPlaces() {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, 'places')
+        )
+
+        const firestorePlaces =
+          querySnapshot.docs.map(
+            (document) => ({
+              ...document.data(),
+              id: document.id,
+            })
+          )
+
+        setFirebasePlaces(firestorePlaces)
+      } catch (error) {
+        console.error(
+          'Error loading places:',
+          error
+        )
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPlaces()
+  }, [])
+
+  const filteredPlaces = useMemo(() => {
+    const search =
+      searchTerm.trim().toLowerCase()
+
+    if (!search) {
+      return firebasePlaces
+    }
+
+    return firebasePlaces.filter((place) => {
+      const name =
+        place.name?.toLowerCase() || ''
+
+      const city =
+        place.city?.toLowerCase() || ''
+
+      const category =
+        place.category?.toLowerCase() || ''
+
+      const address =
+        place.address?.toLowerCase() || ''
+
+      return (
+        name.includes(search) ||
+        city.includes(search) ||
+        category.includes(search) ||
+        address.includes(search)
+      )
+    })
+  }, [searchTerm, firebasePlaces])
+
+  async function handleDeletePlace(place) {
+    const confirmed = window.confirm(
+      `Delete ${place.name}?`
+    )
+
+    if (!confirmed) {
+      return
+    }
+
     try {
-      const querySnapshot = await getDocs(
-        collection(db, 'places')
+      await deleteDoc(
+        doc(
+          db,
+          'places',
+          place.id
+        )
       )
 
- const firestorePlaces = querySnapshot.docs.map((document) => ({
-  ...document.data(),
-  id: document.id,
-}))
+      setFirebasePlaces((current) =>
+        current.filter(
+          (item) =>
+            item.id !== place.id
+        )
+      )
 
-      setFirebasePlaces(firestorePlaces)
+      toast.success(
+        `${place.name} was deleted successfully.`
+      )
     } catch (error) {
-      console.error('Error loading places:', error)
-    } finally {
-      setLoading(false)
+      console.error(
+        'Error deleting place:',
+        error
+      )
+
+      toast.error(
+        'Could not delete the place. Please try again.'
+      )
     }
   }
 
-  fetchPlaces()
-}, [])
+  async function handleToggleVerified(place) {
+    const newVerified = !place.verified
 
-
-const filteredPlaces = useMemo(() => {
-  const search = searchTerm.trim().toLowerCase()
-
-  if (!search) {
-    return firebasePlaces
-  }
-
-  return firebasePlaces.filter((place) => {
-    const name =
-      place.name?.toLowerCase() || ''
-
-    const city =
-      place.city?.toLowerCase() || ''
-
-    const category =
-      place.category?.toLowerCase() || ''
-
-    const address =
-      place.address?.toLowerCase() || ''
-
-    return (
-      name.includes(search) ||
-      city.includes(search) ||
-      category.includes(search) ||
-      address.includes(search)
-    )
-  })
-}, [searchTerm, firebasePlaces])
-
-async function handleDeletePlace(place) {
-  const confirmed = window.confirm(
-    `Delete ${place.name}?`
-  )
-
-  if (!confirmed) {
-    return
-  }
-
-  try {
-    const placeId = place.id
-
-    const placeRef = doc(
-      db,
-      'places',
-      placeId
-    )
-
-    await deleteDoc(placeRef)
-
-    setFirebasePlaces((current) =>
-      current.filter(
-        (item) => item.id !== placeId
+    try {
+      await updateDoc(
+        doc(
+          db,
+          'places',
+          place.id
+        ),
+        {
+          verified: newVerified,
+        }
       )
-    )
 
-    toast.success(
-      `${place.name} was deleted successfully.`
-    )
-  } catch (error) {
-    console.error(
-      'Error deleting place:',
-      error
-    )
-
-    toast.error(
-      'Could not delete the place. Please try again.'
-    )
-  }
-}
-
-async function handleToggleVerified(place) {
-  try {
-   const placeId = place.id
-
-    const placeRef = doc(
-      db,
-      'places',
-      placeId
-    )
-
-    const newVerified =
-      !place.verified
-
-    await updateDoc(placeRef, {
-      verified: newVerified,
-    })
-
-    setFirebasePlaces((current) =>
-      current.map((item) =>
-          item.id === placeId
-          ? {
-              ...item,
-              verified: newVerified,
-            }
-          : item
+      setFirebasePlaces((current) =>
+        current.map((item) =>
+          item.id === place.id
+            ? {
+                ...item,
+                verified: newVerified,
+              }
+            : item
+        )
       )
-    )
 
-    toast.success(
-      newVerified
-        ? `${place.name} is now verified.`
-        : `${place.name} is now unverified.`
-    )
-  } catch (error) {
-    console.error(
-      'Error updating verified status:',
-      error
-    )
+      toast.success(
+        newVerified
+          ? `${place.name} is now verified.`
+          : `${place.name} is now unverified.`
+      )
+    } catch (error) {
+      console.error(
+        'Error updating verified status:',
+        error
+      )
 
-    toast.error(
-      'Could not update verification status.'
-    )
+      toast.error(
+        'Could not update verification status.'
+      )
+    }
   }
-}
-    
-
-
 
   return (
     <main className="admin-places-page">
       <div className="admin-places-container">
-
         <Link
           to="/admin"
           className="admin-back-link"
@@ -209,7 +206,6 @@ async function handleToggleVerified(place) {
         </div>
 
         <section className="admin-places-toolbar">
-
           <div className="admin-places-search">
             <Search size={19} />
 
@@ -217,7 +213,9 @@ async function handleToggleVerified(place) {
               type="search"
               value={searchTerm}
               onChange={(event) =>
-                setSearchTerm(event.target.value)
+                setSearchTerm(
+                  event.target.value
+                )
               }
               placeholder="Search places..."
               aria-label="Search places"
@@ -230,17 +228,15 @@ async function handleToggleVerified(place) {
               ? 'place'
               : 'places'}
           </span>
-
         </section>
 
         <section className="admin-places-card">
-  {loading ? (
-    <p className="admin-loading-text">
-      Loading places...
-    </p>
-  ) : filteredPlaces.length > 0 ? (
+          {loading ? (
+            <p className="admin-loading-text">
+              Loading places...
+            </p>
+          ) : filteredPlaces.length > 0 ? (
             <div className="admin-places-table-wrapper">
-
               <table className="admin-places-table">
                 <thead>
                   <tr>
@@ -254,131 +250,162 @@ async function handleToggleVerified(place) {
                 </thead>
 
                 <tbody>
-                  {filteredPlaces.map((place) => (
-                    <tr key={place.id}>
+                  {filteredPlaces.map(
+                    (place) => (
+                      <tr key={place.id}>
+                        <td>
+                          <div className="admin-place-info">
+                            {place.images?.[0] ? (
+                              <img
+                                src={
+                                  place
+                                    .images[0]
+                                }
+                                alt={
+                                  place.name
+                                }
+                                className="admin-place-image"
+                              />
+                            ) : (
+                              <div className="admin-place-image-placeholder">
+                                No image
+                              </div>
+                            )}
 
-                      <td>
-                        <div className="admin-place-info">
+                            <div>
+                              <strong>
+                                {place.name}
+                              </strong>
 
-                        {place.images?.[0] ? (
-  <img
-    src={place.images[0]}
-    alt={place.name}
-    className="admin-place-image"
-  />
-) : (
-  <div className="admin-place-image-placeholder">
-    No image
-  </div>
-)}
+                              <span>
+                                ID: {place.id}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
 
-                          <div>
-                            <strong>
-                              {place.name}
-                            </strong>
+                        <td>
+                          {place.category}
+                        </td>
 
+                        <td>
+                          <div className="admin-location-cell">
+                            <MapPin
+                              size={15}
+                            />
                             <span>
-                              ID: {place.id}
+                              {place.city}
                             </span>
                           </div>
+                        </td>
 
-                        </div>
-                      </td>
+                        <td>
+                          <strong>
+                            {place.ratingStars ??
+                              '—'}
+                          </strong>
+                        </td>
 
-                      <td>
-                        {place.category}
-                      </td>
-
-                      <td>
-                        <div className="admin-location-cell">
-                          <MapPin size={15} />
-                          <span>{place.city}</span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <strong>
-                          {place.ratingStars ?? '—'}
-                        </strong>
-                      </td>
-
-                      <td>
-                        <span
-                          className={
-                            place.verified
-                              ? 'admin-place-status verified'
-                              : 'admin-place-status pending'
-                          }
-                        >
-                          {place.verified ? (
-                            <>
-                              <BadgeCheck size={14} />
-                              Verified
-                            </>
-                          ) : (
-                            <>
-                              <ShieldOff size={14} />
-                              Not Verified
-                            </>
-                          )}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="admin-place-actions">
-
-                    <Link
-  to={`/places/${place.id}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="admin-icon-button"
-  aria-label={`View ${place.name}`}
->
-  <Eye size={18} />
-</Link>
-                          <Link
-                            to={`/admin/places/${place.id}/edit`}
-                            className="admin-icon-button"
-                            aria-label={`Edit ${place.name}`}
-                            title="Edit place"
+                        <td>
+                          <span
+                            className={
+                              place.verified
+                                ? 'admin-place-status verified'
+                                : 'admin-place-status pending'
+                            }
                           >
-                            <Pencil size={17} />
-                          </Link>
+                            {place.verified ? (
+                              <>
+                                <BadgeCheck
+                                  size={14}
+                                />
+                                Verified
+                              </>
+                            ) : (
+                              <>
+                                <ShieldOff
+                                  size={14}
+                                />
+                                Not Verified
+                              </>
+                            )}
+                          </span>
+                        </td>
 
-                         <button
-  type="button"
-  className={`admin-icon-button verify ${ place.verified ? 'verified' : ''}`}
-  onClick={() => handleToggleVerified(place)}
-    aria-label={
-    place.verified
-      ? `Unverify ${place.name}`
-      : `Verify ${place.name}`
-    }
-      title={
-    place.verified
-      ? 'Unverify place'
-      : 'Verify place'
-  }
->
-  <BadgeCheck size={17} />
-</button>
+                        <td>
+                          <div className="admin-place-actions">
+                            <Link
+                              to={`/places/${place.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="admin-icon-button"
+                              aria-label={`View ${place.name}`}
+                              title="View place"
+                            >
+                              <Eye size={18} />
+                            </Link>
 
-                       <button
-  type="button"
-  className="admin-icon-button delete"
-  onClick={() => handleDeletePlace(place)}
->
-  <Trash2 size={17} />
-</button>
+                            <Link
+                              to={`/admin/places/${place.id}/edit`}
+                              className="admin-icon-button"
+                              aria-label={`Edit ${place.name}`}
+                              title="Edit place"
+                            >
+                              <Pencil
+                                size={17}
+                              />
+                            </Link>
 
-                        </div>
-                      </td>
+                            <button
+                              type="button"
+                              className={`admin-icon-button verify ${
+                                place.verified
+                                  ? 'verified'
+                                  : ''
+                              }`}
+                              onClick={() =>
+                                handleToggleVerified(
+                                  place
+                                )
+                              }
+                              aria-label={
+                                place.verified
+                                  ? `Unverify ${place.name}`
+                                  : `Verify ${place.name}`
+                              }
+                              title={
+                                place.verified
+                                  ? 'Unverify place'
+                                  : 'Verify place'
+                              }
+                            >
+                              <BadgeCheck
+                                size={17}
+                              />
+                            </button>
 
-                    </tr>
-                  ))}
+                            <button
+                              type="button"
+                              className="admin-icon-button delete"
+                              onClick={() =>
+                                handleDeletePlace(
+                                  place
+                                )
+                              }
+                              aria-label={`Delete ${place.name}`}
+                              title="Delete place"
+                            >
+                              <Trash2
+                                size={17}
+                              />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
-
             </div>
           ) : (
             <div className="admin-places-empty">
@@ -392,9 +419,7 @@ async function handleToggleVerified(place) {
               </p>
             </div>
           )}
-
         </section>
-
       </div>
     </main>
   )

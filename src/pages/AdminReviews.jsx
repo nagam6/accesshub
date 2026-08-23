@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-
+import {
+  MessageSquareText,
+  Star,
+  Trash2,
+  UserRound,
+} from 'lucide-react'
 import {
   collection,
   deleteDoc,
@@ -10,16 +15,9 @@ import {
   runTransaction,
   where,
 } from 'firebase/firestore'
+import { toast } from 'react-toastify'
 
 import { db } from '../firebase/firebase'
-
-import {
-  ArrowLeft,
-  MessageSquareText,
-  Star,
-  Trash2,
-  UserRound
-} from 'lucide-react'
 
 import './AdminReviews.css'
 
@@ -46,7 +44,6 @@ function AdminReviews() {
             (reviewDocument) => ({
               firestoreId:
                 reviewDocument.id,
-
               ...reviewDocument.data(),
             })
           )
@@ -59,14 +56,14 @@ function AdminReviews() {
 
         const placesLookup = {}
 
-      placesSnapshot.docs.forEach(
-  (placeDocument) => {
-    placesLookup[placeDocument.id] = {
-      ...placeDocument.data(),
-      id: placeDocument.id,
-    }
-  }
-)
+        placesSnapshot.docs.forEach(
+          (placeDocument) => {
+            placesLookup[placeDocument.id] = {
+              ...placeDocument.data(),
+              id: placeDocument.id,
+            }
+          }
+        )
 
         setReviews(reviewsData)
         setPlacesMap(placesLookup)
@@ -83,117 +80,122 @@ function AdminReviews() {
     loadAdminReviews()
   }, [])
 
-async function handleDeleteReview(review) {
-  const confirmed = window.confirm(
-    `Delete this review by ${
-      review.userName || 'this user'
-    }?`
-  )
-
-  if (!confirmed) {
-    return
-  }
-
-  try {
-    const reviewRef = doc(
-      db,
-      'reviews',
-      review.firestoreId
+  async function handleDeleteReview(review) {
+    const confirmed = window.confirm(
+      `Delete this review by ${
+        review.userName || 'this user'
+      }?`
     )
 
-    const placeRef = doc(
-      db,
-      'places',
-      String(review.placeId)
-    )
+    if (!confirmed) {
+      return
+    }
 
-    await deleteDoc(reviewRef)
+    try {
+      const reviewRef = doc(
+        db,
+        'reviews',
+        review.firestoreId
+      )
 
-    const remainingReviewsQuery = query(
-      collection(db, 'reviews'),
-      where(
-        'placeId',
-        '==',
+      const placeRef = doc(
+        db,
+        'places',
         String(review.placeId)
       )
-    )
 
-    const remainingSnapshot =
-      await getDocs(remainingReviewsQuery)
+      await deleteDoc(reviewRef)
 
-    const remainingReviews =
-      remainingSnapshot.docs.map(
-        (document) => document.data()
-      )
-
-    const reviewCount =
-      remainingReviews.length
-
-    const ratingStars =
-      reviewCount === 0
-        ? 0
-        : Number(
-            (
-              remainingReviews.reduce(
-                (sum, item) =>
-                  sum +
-                  Number(
-                    item.ratingStars || 0
-                  ),
-                0
-              ) /
-              reviewCount
-            ).toFixed(1)
-          )
-
-    await runTransaction(
-      db,
-      async (transaction) => {
-        const placeSnapshot =
-          await transaction.get(placeRef)
-
-        if (!placeSnapshot.exists()) {
-          return
-        }
-
-        transaction.update(
-          placeRef,
-          {
-            reviews: reviewCount,
-            ratingStars,
-          }
+      const remainingReviewsQuery = query(
+        collection(db, 'reviews'),
+        where(
+          'placeId',
+          '==',
+          String(review.placeId)
         )
-      }
-    )
-
-    setReviews((current) =>
-      current.filter(
-        (item) =>
-          item.firestoreId !==
-          review.firestoreId
       )
-    )
-  } catch (error) {
-    console.error(
-      'Error deleting review:',
-      error
-    )
 
-    alert(
-      'Could not delete the review.'
-    )
+      const remainingSnapshot =
+        await getDocs(
+          remainingReviewsQuery
+        )
+
+      const remainingReviews =
+        remainingSnapshot.docs.map(
+          (document) =>
+            document.data()
+        )
+
+      const reviewCount =
+        remainingReviews.length
+
+      const ratingStars =
+        reviewCount === 0
+          ? 0
+          : Number(
+              (
+                remainingReviews.reduce(
+                  (sum, item) =>
+                    sum +
+                    Number(
+                      item.ratingStars || 0
+                    ),
+                  0
+                ) / reviewCount
+              ).toFixed(1)
+            )
+
+      await runTransaction(
+        db,
+        async (transaction) => {
+          const placeSnapshot =
+            await transaction.get(placeRef)
+
+          if (!placeSnapshot.exists()) {
+            return
+          }
+
+          transaction.update(
+            placeRef,
+            {
+              reviews: reviewCount,
+              ratingStars,
+            }
+          )
+        }
+      )
+
+      setReviews((current) =>
+        current.filter(
+          (item) =>
+            item.firestoreId !==
+            review.firestoreId
+        )
+      )
+
+      toast.success(
+        'Review deleted successfully.'
+      )
+    } catch (error) {
+      console.error(
+        'Error deleting review:',
+        error
+      )
+
+      toast.error(
+        'Could not delete the review.'
+      )
+    }
   }
-}
+
   return (
     <main className="admin-reviews-page">
       <div className="admin-reviews-container">
-
         <Link
           to="/admin"
           className="admin-back-link"
         >
-          <ArrowLeft size={18} />
-          Back to Dashboard
+          ← Back to Dashboard
         </Link>
 
         <div className="admin-reviews-heading">
@@ -219,7 +221,6 @@ async function handleDeleteReview(review) {
           </div>
         ) : (
           <div className="admin-reviews-list">
-
             {reviews.map((review) => {
               const place =
                 placesMap[
@@ -231,11 +232,8 @@ async function handleDeleteReview(review) {
                   key={review.firestoreId}
                   className="admin-review-card"
                 >
-
                   <div className="admin-review-top">
-
                     <div className="admin-review-user">
-
                       <div className="admin-review-avatar">
                         <UserRound size={20} />
                       </div>
@@ -251,7 +249,6 @@ async function handleDeleteReview(review) {
                             `Place ${review.placeId}`}
                         </p>
                       </div>
-
                     </div>
 
                     <div className="admin-review-rating">
@@ -264,7 +261,6 @@ async function handleDeleteReview(review) {
                         {review.ratingStars ?? 0}
                       </strong>
                     </div>
-
                   </div>
 
                   <p className="admin-review-comment">
@@ -272,7 +268,6 @@ async function handleDeleteReview(review) {
                   </p>
 
                   <div className="admin-review-meta">
-
                     <span>
                       {review.visitDate
                         ? new Date(
@@ -284,11 +279,9 @@ async function handleDeleteReview(review) {
                     <span>
                       Helpful: {review.helpful ?? 0}
                     </span>
-
                   </div>
 
                   <div className="admin-review-actions">
-
                     {place && (
                       <Link
                         to={`/places/${place.id}`}
@@ -305,20 +298,20 @@ async function handleDeleteReview(review) {
                       onClick={() =>
                         handleDeleteReview(review)
                       }
+                      aria-label={`Delete review by ${
+                        review.userName ||
+                        'this user'
+                      }`}
                     >
                       <Trash2 size={16} />
                       Delete Review
                     </button>
-
                   </div>
-
                 </article>
               )
             })}
-
           </div>
         )}
-
       </div>
     </main>
   )

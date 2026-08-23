@@ -1,8 +1,8 @@
 import { Heart, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { useFavorites } from '../context/FavoritesContext'
 import PlaceCard from '../components/PlaceCard'
+import { useFavorites } from '../context/FavoritesContext'
 
 import './Favorites.css'
 
@@ -12,10 +12,12 @@ function Favorites() {
   return (
     <main className="favorites-page">
       <div className="favorites-container">
-
         <div className="favorites-heading">
           <div className="favorites-heading-icon">
-            <Heart size={24} fill="currentColor" />
+            <Heart
+              size={24}
+              fill="currentColor"
+            />
           </div>
 
           <div>
@@ -26,7 +28,8 @@ function Favorites() {
             <h1>Favorites</h1>
 
             <p>
-              Keep the places you want to remember in one place.
+              Keep the places you want to remember
+              in one place.
             </p>
           </div>
         </div>
@@ -35,7 +38,9 @@ function Favorites() {
           <>
             <div className="favorites-results">
               <p>
-                <strong>{favorites.length}</strong>{' '}
+                <strong>
+                  {favorites.length}
+                </strong>{' '}
                 {favorites.length === 1
                   ? 'saved place'
                   : 'saved places'}
@@ -60,7 +65,8 @@ function Favorites() {
             <h2>No favorites yet</h2>
 
             <p>
-              Save places you are interested in and they will appear here.
+              Save places you are interested in
+              and they will appear here.
             </p>
 
             <Link
@@ -72,7 +78,6 @@ function Favorites() {
             </Link>
           </div>
         )}
-
       </div>
     </main>
   )

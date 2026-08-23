@@ -4,15 +4,11 @@ import {
   Phone,
   MapPin
 } from 'lucide-react'
-
-import {
-  Link,
-} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import './Footer.css'
 
 function Footer() {
-  // Logo → Home + top of page
   function handleLogoClick() {
     window.scrollTo({
       top: 0,
@@ -25,9 +21,7 @@ function Footer() {
     <footer className="site-footer">
       <div className="footer-container">
 
-        {/* BRAND */}
-
-        <div className="footer-brand">
+        <section className="footer-brand">
 
           <Link
             to="/"
@@ -54,12 +48,12 @@ function Footer() {
             information before they visit.
           </p>
 
-        </div>
+        </section>
 
-        {/* ACCESSIBILITY */}
-
-        <div className="footer-column">
-          <h4>Accessibility</h4>
+        <nav
+          className="footer-column"
+          aria-label="Accessibility links"
+        >          <h4>Accessibility</h4>
 
           <Link
             to="/about"
@@ -74,19 +68,19 @@ function Footer() {
             About Us
           </Link>
 
-    <a href="/#accessibility">
-  Accessibility Features
-</a>
+          <Link to="/#accessibility">
+            Accessibility Features
+          </Link>
 
-<a href="/#how-it-works">
-  How It Works
-</a>
-        </div>
+          <Link to="/#how-it-works">
+            How It Works
+          </Link>
+        </nav>
 
-        {/* ACCOUNT */}
-
-        <div className="footer-column">
-          <h4>Account</h4>
+        <nav
+          className="footer-column"
+          aria-label="Account links"
+        >          <h4>Account</h4>
 
           <Link to="/login">
             Log In
@@ -99,11 +93,10 @@ function Footer() {
           <Link to="/profile">
             Profile
           </Link>
-        </div>
+        </nav>
 
-        {/* CONTACT */}
 
-        <div className="footer-column footer-contact">
+        <section className="footer-column footer-contact">
           <h4>Contact</h4>
 
           <p className="footer-contact-line">
@@ -120,7 +113,7 @@ function Footer() {
             <MapPin size={17} />
             <span>Nazareth, Israel</span>
           </p>
-        </div>
+        </section>
 
       </div>
 

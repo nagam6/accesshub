@@ -2,23 +2,12 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState
+  useState,
 } from 'react'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 
-import {
-  onAuthStateChanged,
-  signOut
-} from 'firebase/auth'
-
-import {
-  doc,
-  getDoc
-} from 'firebase/firestore'
-
-import {
-  auth,
-  db
-} from '../firebase/firebase'
+import { auth, db } from '../firebase/firebase'
 
 const AuthContext = createContext()
 
@@ -46,12 +35,10 @@ export function AuthProvider({ children }) {
             firebaseUser.uid
           )
 
-          const userSnapshot =
-            await getDoc(userRef)
+          const userSnapshot = await getDoc(userRef)
 
           if (userSnapshot.exists()) {
-            const userData =
-              userSnapshot.data()
+            const userData = userSnapshot.data()
 
             setUserRole(
               String(userData.role || 'user')
@@ -59,6 +46,7 @@ export function AuthProvider({ children }) {
                 .toLowerCase()
             )
           } else {
+            // Default authenticated users to the standard user role.
             setUserRole('user')
           }
         } catch (error) {

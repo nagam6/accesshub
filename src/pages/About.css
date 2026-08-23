@@ -2,61 +2,53 @@
   background-color: #f5f8f8;
 }
 
-/* =========================
-   HERO
-========================= */
-
-.about-page {
-  background-color: #f5f8f8;
-}
-
-/* =========================
-   HERO
-========================= */
+/* Hero */
 
 .about-hero {
-   position: relative;
+  position: relative;
   z-index: 1;
+
+  min-height: 350px;
+  padding: 38px 24px;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  text-align: center;
+  overflow: hidden;
 
-  background:
-    linear-gradient(
-      135deg,
-      #08777c 0%,
-      #075e68 100%
-    );
-
+  background: linear-gradient(
+    135deg,
+    #08777c 0%,
+    #075e68 100%
+  );
   color: #ffffff;
-   min-height: 350px;
-  padding: 38px 24px;
+
+  text-align: center;
 }
 
 .about-hero-content {
-   position: relative;
+  position: relative;
   z-index: 1;
+
   width: 100%;
   max-width: 850px;
   margin: 0 auto;
 
   display: flex;
   flex-direction: column;
-  align-items: center
+  align-items: center;
 }
 
 .about-badge {
   width: fit-content;
+  margin: 0 0 10px;
+  padding: 8px 14px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-
-  margin: 0 0 10px;
-  padding: 8px 14px;
 
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
@@ -66,15 +58,17 @@
   font-size: 0.86rem;
   font-weight: 700;
 }
+
 .about-hero-title {
   margin: 0 0 10px;
 
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(3rem, 5vw, 4.5rem);
+  font-weight: 700;
   line-height: 1.08;
-   font-weight: 700;
 }
-.about-hero-title-accent {
+
+.hero-title-accent {
   color: #73ddd5;
   font-style: italic;
   font-weight: 500;
@@ -82,7 +76,6 @@
 
 .about-hero p {
   max-width: 760px;
-
   margin: 0 auto 8px;
 
   color: rgba(255, 255, 255, 0.9);
@@ -94,7 +87,7 @@
 .about-hero-message {
   display: block;
 
-    margin: 0 0 14px;
+  margin: 0 0 14px;
 
   color: #d7fffa;
 
@@ -102,11 +95,11 @@
 }
 
 .about-listen-button {
+  padding: 13px 18px;
+
   display: inline-flex;
   align-items: center;
   gap: 8px;
-
-  padding: 13px 18px;
 
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 13px;
@@ -126,20 +119,18 @@
 
 .about-listen-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
-
   transform: translateY(-1px);
 }
 
-/* DECORATIVE CIRCLES */
-
 .about-hero-decoration {
-    position: absolute;
-  pointer-events: none;
+  position: absolute;
   z-index: 0;
 
   border-radius: 50%;
 
   background-color: rgba(255, 255, 255, 0.06);
+
+  pointer-events: none;
 }
 
 .about-circle-one {
@@ -158,9 +149,7 @@
   bottom: -90px;
 }
 
-/* =========================
-   COMMON
-========================= */
+/* Shared */
 
 .about-container {
   max-width: 1250px;
@@ -169,7 +158,6 @@
 
 .about-section-heading {
   max-width: 760px;
-
   margin: 0 auto 48px;
 
   text-align: center;
@@ -181,7 +169,6 @@
   color: #102f3e;
 
   font-family: Georgia, 'Times New Roman', serif;
-
   font-size: clamp(2rem, 3vw, 2.8rem);
 }
 
@@ -193,9 +180,7 @@
   line-height: 1.7;
 }
 
-/* =========================
-   VALUES
-========================= */
+/* Values */
 
 .about-values-section {
   padding: 85px 32px;
@@ -204,7 +189,6 @@
 .values-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-
   gap: 20px;
 }
 
@@ -223,20 +207,17 @@
 
 .value-card:hover {
   transform: translateY(-4px);
-
-  box-shadow:
-    0 12px 28px rgba(20, 55, 65, 0.08);
+  box-shadow: 0 12px 28px rgba(20, 55, 65, 0.08);
 }
 
 .value-icon {
   width: 52px;
   height: 52px;
+  margin-bottom: 20px;
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  margin-bottom: 20px;
 
   border-radius: 15px;
 }
@@ -254,12 +235,9 @@
 
   color: #66797e;
 
-  line-height: 1.65;
-
   font-size: 0.9rem;
+  line-height: 1.65;
 }
-
-/* SOFT COLOR ACCENTS */
 
 .value-teal .value-icon {
   background-color: #e4f3f1;
@@ -291,9 +269,7 @@
   color: #a97819;
 }
 
-/* =========================
-   IMPACT
-========================= */
+/* Impact */
 
 .about-impact-section {
   padding: 80px 32px;
@@ -304,7 +280,6 @@
 .impact-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-
   gap: 20px;
 }
 
@@ -319,12 +294,11 @@
 .impact-icon {
   width: 52px;
   height: 52px;
+  margin-bottom: 18px;
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  margin-bottom: 18px;
 
   border-radius: 15px;
 
@@ -343,14 +317,11 @@
 
   color: #66797e;
 
-  line-height: 1.7;
-
   font-size: 0.92rem;
+  line-height: 1.7;
 }
 
-/* =========================
-   CTA
-========================= */
+/* CTA */
 
 .about-cta-section {
   padding: 75px 32px 90px;
@@ -358,26 +329,21 @@
 
 .about-cta-card {
   max-width: 1150px;
+  margin: 0 auto;
+  padding: 42px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 35px;
-
-  margin: 0 auto;
-
-  padding: 42px;
 
   border-radius: 24px;
 
-  background:
-    linear-gradient(
-      135deg,
-      #102f3e 0%,
-      #0b4e58 100%
-    );
-
+  background: linear-gradient(
+    135deg,
+    #102f3e 0%,
+    #0b4e58 100%
+  );
   color: #ffffff;
 }
 
@@ -386,7 +352,6 @@
 
   font-size: 0.78rem;
   font-weight: 800;
-
   letter-spacing: 0.08em;
 }
 
@@ -394,13 +359,11 @@
   margin: 7px 0 10px;
 
   font-family: Georgia, 'Times New Roman', serif;
-
   font-size: 2.2rem;
 }
 
 .about-cta-card p {
   max-width: 650px;
-
   margin: 0;
 
   color: rgba(255, 255, 255, 0.8);
@@ -411,7 +374,6 @@
 .about-cta-actions {
   display: flex;
   align-items: center;
-
   gap: 12px;
 
   flex-shrink: 0;
@@ -419,23 +381,21 @@
 
 .about-primary-button,
 .about-secondary-button {
+  padding: 13px 18px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   gap: 8px;
-
-  padding: 13px 18px;
 
   border-radius: 12px;
 
   text-decoration: none;
-
   font-weight: 700;
 }
 
 .about-primary-button {
-background-color: #ff7c5c;
+  background-color: #ff7c5c;
   color: #2f2420;
 }
 
@@ -454,11 +414,18 @@ background-color: #ff7c5c;
   background-color: rgba(255, 255, 255, 0.14);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+/* Tablet */
 
 @media (max-width: 900px) {
+  .about-values-section,
+  .about-impact-section {
+    padding: 70px 24px;
+  }
+
+  .about-cta-section {
+    padding: 65px 24px 75px;
+  }
+
   .values-grid,
   .impact-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -466,14 +433,33 @@ background-color: #ff7c5c;
 
   .about-cta-card {
     align-items: flex-start;
-
     flex-direction: column;
   }
 }
+
+/* Mobile */
 
 @media (max-width: 650px) {
   .about-hero {
-    padding: 65px 22px;
+    min-height: auto;
+    padding: 48px 20px 44px;
+  }
+
+  .about-hero-title {
+    font-size: clamp(2.5rem, 12vw, 3.5rem);
+  }
+
+  .about-hero p {
+    font-size: 0.98rem;
+  }
+
+  .about-badge {
+    max-width: 100%;
+    font-size: 0.78rem;
+  }
+
+  .about-circle-one {
+    right: -130px;
   }
 
   .about-values-section,
@@ -481,6 +467,10 @@ background-color: #ff7c5c;
   .about-cta-section {
     padding-left: 18px;
     padding-right: 18px;
+  }
+
+  .about-section-heading {
+    margin-bottom: 34px;
   }
 
   .values-grid,
@@ -492,359 +482,8 @@ background-color: #ff7c5c;
     padding: 30px 24px;
   }
 
-  .about-cta-actions {
-    width: 100%;
-
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .about-primary-button,
-  .about-secondary-button {
-    width: 100%;
-  }
-}
-/* =========================
-   COMMON
-========================= */
-
-.about-container {
-  max-width: 1250px;
-  margin: 0 auto;
-}
-
-.about-section-heading {
-  max-width: 760px;
-
-  margin: 0 auto 48px;
-
-  text-align: center;
-}
-
-.about-section-heading h2 {
-  margin: 7px 0 12px;
-
-  color: #102f3e;
-
-  font-family: Georgia, 'Times New Roman', serif;
-
-  font-size: clamp(2rem, 3vw, 2.8rem);
-}
-
-.about-section-heading p {
-  margin: 0;
-
-  color: #687b80;
-
-  line-height: 1.7;
-}
-
-/* =========================
-   VALUES
-========================= */
-
-.about-values-section {
-  padding: 85px 32px;
-}
-
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 20px;
-}
-
-.value-card {
-  padding: 28px;
-
-  border: 1px solid #dce5e5;
-  border-radius: 20px;
-
-  background-color: #ffffff;
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.value-card:hover {
-  transform: translateY(-4px);
-
-  box-shadow:
-    0 12px 28px rgba(20, 55, 65, 0.08);
-}
-
-.value-icon {
-  width: 52px;
-  height: 52px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 20px;
-
-  border-radius: 15px;
-}
-
-.value-card h3 {
-  margin: 0 0 10px;
-
-  color: #173843;
-
-  font-size: 1.08rem;
-}
-
-.value-card p {
-  margin: 0;
-
-  color: #66797e;
-
-  line-height: 1.65;
-
-  font-size: 0.9rem;
-}
-
-/* SOFT COLOR ACCENTS */
-
-.value-teal .value-icon {
-  background-color: #e4f3f1;
-  color: #08777c;
-}
-
-.value-blue .value-icon {
-  background-color: #e8f0f8;
-  color: #3f6f9b;
-}
-
-.value-green .value-icon {
-  background-color: #e8f4ed;
-  color: #377859;
-}
-
-.value-coral .value-icon {
-  background-color: #fff0eb;
-  color: #df6d52;
-}
-
-.value-purple .value-icon {
-  background-color: #f1ebf7;
-  color: #765496;
-}
-
-.value-yellow .value-icon {
-  background-color: #fff5dc;
-  color: #a97819;
-}
-
-/* =========================
-   IMPACT
-========================= */
-
-.about-impact-section {
-  padding: 80px 32px;
-
-  background-color: #edf5f4;
-}
-
-.impact-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 20px;
-}
-
-.impact-card {
-  padding: 28px;
-
-  border-radius: 20px;
-
-  background-color: #ffffff;
-}
-
-.impact-icon {
-  width: 52px;
-  height: 52px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 18px;
-
-  border-radius: 15px;
-
-  background-color: #e3f1ef;
-  color: #08777c;
-}
-
-.impact-card h3 {
-  margin: 0 0 10px;
-
-  color: #173843;
-}
-
-.impact-card p {
-  margin: 0;
-
-  color: #66797e;
-
-  line-height: 1.7;
-
-  font-size: 0.92rem;
-}
-
-/* =========================
-   CTA
-========================= */
-
-.about-cta-section {
-  padding: 75px 32px 90px;
-}
-
-.about-cta-card {
-  max-width: 1150px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 35px;
-
-  margin: 0 auto;
-
-  padding: 42px;
-
-  border-radius: 24px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #102f3e 0%,
-      #0b4e58 100%
-    );
-
-  color: #ffffff;
-}
-
-.about-cta-label {
-  color: #8ee0d7;
-
-  font-size: 0.78rem;
-  font-weight: 800;
-
-  letter-spacing: 0.08em;
-}
-
-.about-cta-card h2 {
-  margin: 7px 0 10px;
-
-  font-family: Georgia, 'Times New Roman', serif;
-
-  font-size: 2.2rem;
-}
-
-.about-cta-card p {
-  max-width: 650px;
-
-  margin: 0;
-
-  color: rgba(255, 255, 255, 0.8);
-
-  line-height: 1.7;
-}
-
-.about-cta-actions {
-  display: flex;
-  align-items: center;
-
-  gap: 12px;
-
-  flex-shrink: 0;
-}
-
-.about-primary-button,
-.about-secondary-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 8px;
-
-  padding: 13px 18px;
-
-  border-radius: 12px;
-
-  text-decoration: none;
-
-  font-weight: 700;
-}
-
-.about-primary-button {
-background-color: #ff7c5c;
-  color: #2f2420;
-}
-
-.about-primary-button:hover {
-  background-color: #ff6543;
-}
-
-.about-secondary-button {
-  border: 1px solid rgba(255, 255, 255, 0.3);
-
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-
-.about-secondary-button:hover {
-  background-color: rgba(255, 255, 255, 0.14);
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 900px) {
-  .values-grid,
-  .impact-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .about-cta-card {
-    align-items: flex-start;
-
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 650px) {
-.about-hero {
-  min-height: auto;
-  padding: 48px 20px 44px;
-}
-
-.about-hero h1 {
-  font-size: clamp(2.5rem, 12vw, 3.5rem);
-}
-
-.about-hero p {
-  font-size: 0.98rem;
-}
-
-  .about-values-section,
-  .about-impact-section,
-  .about-cta-section {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-
-  .values-grid,
-  .impact-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .about-cta-card {
-    padding: 30px 24px;
+  .about-cta-card h2 {
+    font-size: 1.8rem;
   }
 
   .about-cta-actions {

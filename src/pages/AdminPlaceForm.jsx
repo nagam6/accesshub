@@ -1,28 +1,38 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate , useParams} from 'react-router-dom'
-
-import { collection, addDoc, doc, getDoc, updateDoc} from 'firebase/firestore'
-import { db } from '../firebase/firebase'
-
 import {
-  ArrowLeft,
-  MapPin,
-  Image,
+  Link,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  updateDoc,
+} from 'firebase/firestore'
+import {
   Accessibility,
+  ArrowLeft,
+  Image,
+  MapPin,
+  Save,
   ShieldCheck,
-  Save
 } from 'lucide-react'
+import { toast } from 'react-toastify'
+
+import { db } from '../firebase/firebase'
 
 import './AdminPlaceForm.css'
 
 function AdminPlaceForm() {
-const navigate = useNavigate()
-const { id } = useParams()
+  const navigate = useNavigate()
+  const { id } = useParams()
 
-const isEditMode = Boolean(id)
+  const isEditMode = Boolean(id)
 
-const [isSubmitting, setIsSubmitting] = useState(false)
-const [loadingPlace, setLoadingPlace] = useState(isEditMode)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loadingPlace, setLoadingPlace] = useState(isEditMode)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -32,7 +42,6 @@ const [loadingPlace, setLoadingPlace] = useState(isEditMode)
     description: '',
     images: '',
     verified: false,
-
     mobility: false,
     visual: false,
     hearing: false,
@@ -41,236 +50,268 @@ const [loadingPlace, setLoadingPlace] = useState(isEditMode)
     parking: false,
   })
 
+  useEffect(() => {
+    if (!isEditMode) {
+      return
+    }
+
+    async function loadPlace() {
+      try {
+        const placeSnapshot = await getDoc(
+          doc(db, 'places', id)
+        )
+
+        if (!placeSnapshot.exists()) {
+          toast.error('Place not found.')
+          navigate('/admin/places')
+          return
+        }
+
+        const placeData = placeSnapshot.data()
+
+        const accessibilityFeatures = Object.values(
+          placeData.accessibility || {}
+        ).flat()
+
+        setFormData({
+          name: placeData.name || '',
+          category: placeData.category || '',
+          city: placeData.city || '',
+          address: placeData.address || '',
+          description: placeData.description || '',
+
+          images: Array.isArray(placeData.images)
+            ? placeData.images.join('\n')
+            : '',
+
+          verified: Boolean(placeData.verified),
+
+          mobility:
+            placeData.accessibility?.mobility?.some(
+              (feature) =>
+                feature.name ===
+                'Wheelchair accessibility'
+            ) || false,
+
+          visual:
+            placeData.accessibility?.visual?.length > 0,
+
+          hearing:
+            placeData.accessibility?.hearing?.length > 0,
+
+          sensory:
+            placeData.accessibility?.sensory?.length > 0,
+
+          restroom:
+            accessibilityFeatures.some(
+              (feature) =>
+                feature.name ===
+                'Accessible restroom'
+            ),
+
+          parking: Boolean(
+            placeData.visitInfo?.parking
+          ),
+        })
+      } catch (error) {
+        console.error(
+          'Error loading place:',
+          error
+        )
+
+        toast.error(
+          'Could not load the place.'
+        )
+      } finally {
+        setLoadingPlace(false)
+      }
+    }
+
+    loadPlace()
+  }, [id, isEditMode, navigate])
+
   function handleChange(event) {
-    const { name, value, type, checked } = event.target
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = event.target
 
     setFormData((current) => ({
       ...current,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]:
+        type === 'checkbox'
+          ? checked
+          : value,
     }))
   }
-useEffect(() => {
-  if (!isEditMode) {
-    return
-  }
 
-  async function loadPlace() {
+  async function handleSubmit(event) {
+    event.preventDefault()
+
+    if (
+      !formData.name.trim() ||
+      !formData.category ||
+      !formData.city.trim() ||
+      !formData.address.trim()
+    ) {
+      toast.warning(
+        'Please complete all required fields.'
+      )
+      return
+    }
+
+    const imageArray = formData.images
+      .split('\n')
+      .map((image) => image.trim())
+      .filter(Boolean)
+
+    const mobilityFeatures = []
+
+    if (formData.mobility) {
+      mobilityFeatures.push({
+        name: 'Wheelchair accessibility',
+        status: 'available',
+      })
+    }
+
+    if (formData.restroom) {
+      mobilityFeatures.push({
+        name: 'Accessible restroom',
+        status: 'available',
+      })
+    }
+
+    const placeData = {
+      name: formData.name.trim(),
+      category: formData.category,
+      city: formData.city.trim(),
+      address: formData.address.trim(),
+      description: formData.description.trim(),
+
+      images:
+        imageArray.length > 0
+          ? imageArray
+          : [
+              'https://placehold.co/900x600?text=AccessHub+Place',
+            ],
+
+      verified: formData.verified,
+
+      accessibilityMatch: 0,
+
+      accessibility: {
+        mobility: mobilityFeatures,
+
+        visual: formData.visual
+          ? [
+              {
+                name: 'Visual accessibility',
+                status: 'available',
+              },
+            ]
+          : [],
+
+        hearing: formData.hearing
+          ? [
+              {
+                name: 'Hearing accessibility',
+                status: 'available',
+              },
+            ]
+          : [],
+
+        sensory: formData.sensory
+          ? [
+              {
+                name: 'Sensory friendly',
+                status: 'available',
+              },
+            ]
+          : [],
+      },
+
+      visitInfo: {
+        entrance: '',
+        parking: formData.parking
+          ? 'Accessible parking available.'
+          : '',
+        hours: '',
+        phone: '',
+        website: '',
+        transport: '',
+      },
+    }
+
     try {
-      const placeRef = doc(db, 'places', id)
-      const placeSnapshot = await getDoc(placeRef)
+      setIsSubmitting(true)
 
-      if (!placeSnapshot.exists()) {
-        alert('Place not found.')
-        navigate('/admin/places')
-        return
+      if (isEditMode) {
+        await updateDoc(
+          doc(db, 'places', id),
+          {
+            ...placeData,
+            updatedAt:
+              new Date().toISOString(),
+          }
+        )
+
+        toast.success(
+          'Place updated successfully.'
+        )
+      } else {
+        await addDoc(
+          collection(db, 'places'),
+          {
+            ...placeData,
+
+            ratingStars: 0,
+            reviews: 0,
+
+            createdAt:
+              new Date().toISOString(),
+
+            updatedAt:
+              new Date().toISOString(),
+          }
+        )
+
+        toast.success(
+          'Place added successfully.'
+        )
       }
 
-      const placeData = placeSnapshot.data()
-
-setFormData({
-  name: placeData.name || '',
-  category: placeData.category || '',
-  city: placeData.city || '',
-  address: placeData.address || '',
-  description: placeData.description || '',
-
-  images: Array.isArray(placeData.images)
-    ? placeData.images.join('\n')
-    : '',
-
-  verified: Boolean(placeData.verified),
-
-  mobility:
-    placeData.accessibility?.mobility?.length > 0,
-
-  visual:
-    placeData.accessibility?.visual?.length > 0,
-
-  hearing:
-    placeData.accessibility?.hearing?.length > 0,
-
-  sensory:
-    placeData.accessibility?.sensory?.length > 0,
-
-  restroom:
-    Object.values(placeData.accessibility || {})
-      .flat()
-      .some(
-        (feature) =>
-          feature.name === 'Accessible restroom'
-      ),
-
-  parking:
-    Boolean(placeData.visitInfo?.parking),
-})
+      navigate('/admin/places')
     } catch (error) {
       console.error(
-        'Error loading place:',
+        'Error saving place:',
         error
       )
 
-      alert('Could not load the place.')
+      toast.error(
+        'Could not save the place. Please try again.'
+      )
     } finally {
-      setLoadingPlace(false)
+      setIsSubmitting(false)
     }
   }
 
-  loadPlace()
-}, [id, isEditMode, navigate])
-
-async function handleSubmit(event) {
-  event.preventDefault()
-
-  if (
-    !formData.name.trim() ||
-    !formData.category ||
-    !formData.city.trim() ||
-    !formData.address.trim()
-  ) {
-    alert('Please complete all required fields.')
-    return
-  }
-
-  const imageArray = formData.images
-    .split('\n')
-    .map((image) => image.trim())
-    .filter(Boolean)
-
-
-const placeData = {
-  name: formData.name.trim(),
-  category: formData.category,
-  city: formData.city.trim(),
-  address: formData.address.trim(),
-  description: formData.description.trim(),
-
-  images:
-    imageArray.length > 0
-      ? imageArray
-      : [
-          'https://placehold.co/900x600?text=AccessHub+Place',
-        ],
-
-  verified: formData.verified,
-
-  accessibilityMatch: 0,
-
-  accessibility: {
-    mobility: formData.mobility
-      ? [
-          {
-            name: 'Wheelchair accessibility',
-            status: 'available',
-          },
-        ]
-      : [],
-
-    visual: formData.visual
-      ? [
-          {
-            name: 'Visual accessibility',
-            status: 'available',
-          },
-        ]
-      : [],
-
-    hearing: formData.hearing
-      ? [
-          {
-            name: 'Hearing accessibility',
-            status: 'available',
-          },
-        ]
-      : [],
-
-    sensory: formData.sensory
-      ? [
-          {
-            name: 'Sensory friendly',
-            status: 'available',
-          },
-        ]
-      : [],
-  },
-
-  visitInfo: {
-    entrance: '',
-    parking: formData.parking
-      ? 'Accessible parking available.'
-      : '',
-    hours: '',
-    phone: '',
-    website: '',
-    transport: '',
-  },
-}
-  try {
-    setIsSubmitting(true)
-
-    if (isEditMode) {
-      await updateDoc(
-        doc(db, 'places', id),
-        {
-          ...placeData,
-          updatedAt:
-            new Date().toISOString(),
-        }
-      )
-
-      alert(
-        'Place updated successfully.'
-      )
-    } else {
-      await addDoc(
-        collection(db, 'places'),
-        {
-          ...placeData,
-
-          ratingStars: 0,
-          reviews: 0,
-
-          createdAt:
-            new Date().toISOString(),
-
-          updatedAt:
-            new Date().toISOString(),
-        }
-      )
-
-      alert(
-        'Place added successfully.'
-      )
-    }
-
-    navigate('/admin/places')
-  } catch (error) {
-    console.error(
-      'Error saving place:',
-      error
-    )
-
-    alert(
-      'Could not save the place. Please try again.'
-    )
-  } finally {
-    setIsSubmitting(false)
-  }
-}
   if (loadingPlace) {
-  return (
-    <main className="admin-place-form-page">
-      <div className="admin-place-form-container">
-        <p className="admin-form-loading">
-          Loading place...
-        </p>
-      </div>
-    </main>
-  )
-}
-  return (
-    <main className="admin-place-form-page">
-      <div className="admin-place-form-container">
+    return (
+      <main className="admin-place-form-page">
+        <div className="admin-place-form-container">
+          <p className="admin-form-loading">
+            Loading place...
+          </p>
+        </div>
+      </main>
+    )
+  }
 
+  return (
+    <main className="admin-place-form-page">
+      <div className="admin-place-form-container">
         <Link
           to="/admin/places"
           className="admin-form-back"
@@ -284,28 +325,24 @@ const placeData = {
             PLACE MANAGEMENT
           </span>
 
-<h1>
-  {isEditMode
-    ? 'Edit Place'
-    : 'Add New Place'}
-</h1>
-        
-        <p>
-  {isEditMode
-    ? 'Update the place information, accessibility details, images, and verification status.'
-    : 'Add basic information, accessibility details, images, and verification status.'}
-</p>
+          <h1>
+            {isEditMode
+              ? 'Edit Place'
+              : 'Add New Place'}
+          </h1>
+
+          <p>
+            {isEditMode
+              ? 'Update the place information, accessibility details, images, and verification status.'
+              : 'Add basic information, accessibility details, images, and verification status.'}
+          </p>
         </div>
 
         <form
           className="admin-place-form"
           onSubmit={handleSubmit}
         >
-
-          {/* BASIC INFORMATION */}
-
           <section className="admin-form-section">
-
             <div className="admin-form-section-heading">
               <div className="admin-form-section-icon">
                 <MapPin size={21} />
@@ -322,7 +359,6 @@ const placeData = {
             </div>
 
             <div className="admin-form-grid">
-
               <div className="admin-form-group admin-full-field">
                 <label htmlFor="name">
                   Place name *
@@ -352,35 +388,27 @@ const placeData = {
                   <option value="">
                     Select category
                   </option>
-
                   <option value="Museum">
                     Museum
                   </option>
-
                   <option value="Park">
                     Park
                   </option>
-
                   <option value="Restaurant">
                     Restaurant
                   </option>
-
                   <option value="Shopping">
                     Shopping
                   </option>
-
                   <option value="Attraction">
                     Attraction
                   </option>
-
                   <option value="Library">
                     Library
                   </option>
-
                   <option value="Public Service">
                     Public Service
                   </option>
-
                   <option value="Other">
                     Other
                   </option>
@@ -431,15 +459,10 @@ const placeData = {
                   placeholder="Brief description of the place..."
                 />
               </div>
-
             </div>
-
           </section>
 
-          {/* IMAGES */}
-
           <section className="admin-form-section">
-
             <div className="admin-form-section-heading">
               <div className="admin-form-section-icon">
                 <Image size={21} />
@@ -447,10 +470,7 @@ const placeData = {
 
               <div>
                 <h2>Place Images</h2>
-
-                <p>
-                  Add one or more image URLs.
-                </p>
+                <p>Add one or more image URLs.</p>
               </div>
             </div>
 
@@ -476,13 +496,9 @@ const placeData = {
                 main image.
               </small>
             </div>
-
           </section>
 
-          {/* ACCESSIBILITY */}
-
           <section className="admin-form-section">
-
             <div className="admin-form-section-heading">
               <div className="admin-form-section-icon">
                 <Accessibility size={21} />
@@ -499,93 +515,32 @@ const placeData = {
             </div>
 
             <div className="admin-accessibility-grid">
+              {[
+                ['mobility', 'Wheelchair accessibility'],
+                ['visual', 'Visual accessibility'],
+                ['hearing', 'Hearing accessibility'],
+                ['sensory', 'Sensory friendly'],
+                ['restroom', 'Accessible restroom'],
+                ['parking', 'Accessible parking'],
+              ].map(([name, label]) => (
+                <label
+                  key={name}
+                  className="admin-checkbox-card"
+                >
+                  <input
+                    type="checkbox"
+                    name={name}
+                    checked={formData[name]}
+                    onChange={handleChange}
+                  />
 
-              <label className="admin-checkbox-card">
-                <input
-                  type="checkbox"
-                  name="mobility"
-                  checked={formData.mobility}
-                  onChange={handleChange}
-                />
-
-                <span>
-                  Wheelchair accessibility
-                </span>
-              </label>
-
-              <label className="admin-checkbox-card">
-                <input
-                  type="checkbox"
-                  name="visual"
-                  checked={formData.visual}
-                  onChange={handleChange}
-                />
-
-                <span>
-                  Visual accessibility
-                </span>
-              </label>
-
-              <label className="admin-checkbox-card">
-                <input
-                  type="checkbox"
-                  name="hearing"
-                  checked={formData.hearing}
-                  onChange={handleChange}
-                />
-
-                <span>
-                  Hearing accessibility
-                </span>
-              </label>
-
-              <label className="admin-checkbox-card">
-                <input
-                  type="checkbox"
-                  name="sensory"
-                  checked={formData.sensory}
-                  onChange={handleChange}
-                />
-
-                <span>
-                  Sensory friendly
-                </span>
-              </label>
-
-              <label className="admin-checkbox-card">
-                <input
-                  type="checkbox"
-                  name="restroom"
-                  checked={formData.restroom}
-                  onChange={handleChange}
-                />
-
-                <span>
-                  Accessible restroom
-                </span>
-              </label>
-
-              <label className="admin-checkbox-card">
-                <input
-                  type="checkbox"
-                  name="parking"
-                  checked={formData.parking}
-                  onChange={handleChange}
-                />
-
-                <span>
-                  Accessible parking
-                </span>
-              </label>
-
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
-
           </section>
 
-          {/* VERIFICATION */}
-
           <section className="admin-form-section">
-
             <div className="admin-form-section-heading">
               <div className="admin-form-section-icon">
                 <ShieldCheck size={21} />
@@ -602,7 +557,6 @@ const placeData = {
             </div>
 
             <label className="admin-verification-card">
-
               <input
                 type="checkbox"
                 name="verified"
@@ -620,15 +574,10 @@ const placeData = {
                   on this place.
                 </p>
               </div>
-
             </label>
-
           </section>
 
-          {/* ACTIONS */}
-
           <div className="admin-form-actions">
-
             <Link
               to="/admin/places"
               className="admin-form-cancel"
@@ -636,26 +585,24 @@ const placeData = {
               Cancel
             </Link>
 
-     <button
-  type="submit"
-  className="admin-form-submit"
-  disabled={isSubmitting}
->
-  <Save size={18} />
+            <button
+              type="submit"
+              className="admin-form-submit"
+              disabled={isSubmitting}
+            >
+              <Save size={18} />
 
-   {isSubmitting
-    ? 'Saving...'
-    : isEditMode
-      ? 'Save Changes'
-      : 'Add Place'}
-</button>
-
+              {isSubmitting
+                ? 'Saving...'
+                : isEditMode
+                  ? 'Save Changes'
+                  : 'Add Place'}
+            </button>
           </div>
-
         </form>
-
       </div>
     </main>
   )
 }
+
 export default AdminPlaceForm

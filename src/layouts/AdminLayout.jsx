@@ -1,33 +1,38 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useNavigate } from 'react-router-dom'
 import {
-  Shield,
-  LayoutDashboard,
-  MapPin,
-  Lightbulb,
-  Flag,
-  MessageSquareText,
   ExternalLink,
-  LogOut
+  Flag,
+  LayoutDashboard,
+  Lightbulb,
+  LogOut,
+  MapPin,
+  MessageSquareText,
+  Shield,
 } from 'lucide-react'
 
-import { auth } from '../firebase/firebase'
-import { signOut } from 'firebase/auth'
+import { useAuth } from '../context/AuthContext'
 
 import './AdminLayout.css'
 
 function AdminLayout() {
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   async function handleAdminLogout() {
-    await signOut(auth)
-    navigate('/admin-login')
+    try {
+      await logout()
+      navigate('/admin-login')
+    } catch (error) {
+      console.error(
+        'Error logging out:',
+        error
+      )
+    }
   }
 
   return (
     <div className="admin-layout">
-
       <aside className="admin-sidebar">
-
         <div className="admin-sidebar-brand">
           <div className="admin-sidebar-logo">
             <Shield size={22} />
@@ -39,8 +44,10 @@ function AdminLayout() {
           </div>
         </div>
 
-        <nav className="admin-sidebar-nav">
-
+        <nav
+          className="admin-sidebar-nav"
+          aria-label="Admin navigation"
+        >
           <Link to="/admin">
             <LayoutDashboard size={18} />
             Dashboard
@@ -65,11 +72,9 @@ function AdminLayout() {
             <MessageSquareText size={18} />
             Reviews
           </Link>
-
         </nav>
 
         <div className="admin-sidebar-bottom">
-
           <Link
             to="/"
             target="_blank"
@@ -86,15 +91,12 @@ function AdminLayout() {
             <LogOut size={18} />
             Log Out
           </button>
-
         </div>
-
       </aside>
 
       <main className="admin-layout-content">
         <Outlet />
       </main>
-
     </div>
   )
 }

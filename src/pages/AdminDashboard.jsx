@@ -1,118 +1,94 @@
 import {
-  MapPin,
-  MessageSquareText,
   Flag,
   Lightbulb,
+  MapPin,
+  MessageSquareText,
+  PlusCircle,
   ShieldCheck,
-  PlusCircle
 } from 'lucide-react'
-
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-
-import {
-  collection,
-  getDocs
-} from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 
 import { db } from '../firebase/firebase'
+
 import './AdminDashboard.css'
 
 function AdminDashboard() {
-
-const [places, setPlaces] = useState([])
-const [reviews, setReviews] = useState([])
-
-const [pendingSuggestions, setPendingSuggestions] =
-  useState(0)
-
-const [openReports, setOpenReports] =
-  useState(0)
-
-const [loadingDashboard, setLoadingDashboard] =
-  useState(true)
+  const [places, setPlaces] = useState([])
+  const [reviewCount, setReviewCount] = useState(0)
+  const [pendingSuggestions, setPendingSuggestions] =
+    useState(0)
+  const [openReports, setOpenReports] = useState(0)
 
   useEffect(() => {
-  async function loadDashboard() {
-    try {
-      setLoadingDashboard(true)
+    async function loadDashboard() {
+      try {
+        const [
+          placesSnapshot,
+          reviewsSnapshot,
+          suggestionsSnapshot,
+          reportsSnapshot,
+        ] = await Promise.all([
+          getDocs(collection(db, 'places')),
+          getDocs(collection(db, 'reviews')),
+          getDocs(collection(db, 'suggestions')),
+          getDocs(collection(db, 'reports')),
+        ])
 
-      const [
-        placesSnapshot,
-        reviewsSnapshot,
-        suggestionsSnapshot,
-        reportsSnapshot,
-      ] = await Promise.all([
-        getDocs(collection(db, 'places')),
-        getDocs(collection(db, 'reviews')),
-        getDocs(collection(db, 'suggestions')),
-        getDocs(collection(db, 'reports')),
-      ])
-
-    const placesData =
-  placesSnapshot.docs.map(
-    (placeDocument) => ({
-      ...placeDocument.data(),
-      id: placeDocument.id,
-    })
-  )
-
-      const reviewsData =
-        reviewsSnapshot.docs.map(
-          (reviewDocument) => ({
-            firestoreId: reviewDocument.id,
-            ...reviewDocument.data(),
+        const placesData = placesSnapshot.docs.map(
+          (placeDocument) => ({
+            ...placeDocument.data(),
+            id: placeDocument.id,
           })
         )
 
-      const suggestionsData =
-        suggestionsSnapshot.docs.map(
-          (suggestionDocument) =>
-            suggestionDocument.data()
+        const suggestionsData =
+          suggestionsSnapshot.docs.map(
+            (suggestionDocument) =>
+              suggestionDocument.data()
+          )
+
+        const reportsData =
+          reportsSnapshot.docs.map(
+            (reportDocument) =>
+              reportDocument.data()
+          )
+
+        setPlaces(placesData)
+        setReviewCount(reviewsSnapshot.size)
+
+        setPendingSuggestions(
+          suggestionsData.filter(
+            (suggestion) =>
+              suggestion.status === 'pending'
+          ).length
         )
 
-      const reportsData =
-        reportsSnapshot.docs.map(
-          (reportDocument) =>
-            reportDocument.data()
+        setOpenReports(
+          reportsData.filter(
+            (report) =>
+              report.status === 'open'
+          ).length
         )
-
-      setPlaces(placesData)
-      setReviews(reviewsData)
-
-      setPendingSuggestions(
-        suggestionsData.filter(
-          (suggestion) =>
-            suggestion.status === 'pending'
-        ).length
-      )
-
-      setOpenReports(
-        reportsData.filter(
-          (report) =>
-            report.status === 'open'
-        ).length
-      )
-    } catch (error) {
-      console.error(
-        'Error loading admin dashboard:',
-        error
-      )
-    } finally {
-      setLoadingDashboard(false)
+      } catch (error) {
+        console.error(
+          'Error loading admin dashboard:',
+          error
+        )
+      }
     }
-  }
 
-  loadDashboard()
-}, [])
-const verifiedPlaces = places.filter(
-  (place) => place.verified
-).length
+    loadDashboard()
+  }, [])
+
+  const verifiedPlaces = places.filter(
+    (place) => place.verified
+  ).length
 
   return (
     <main className="admin-page">
       <div className="admin-container">
-
         <div className="admin-heading">
           <div>
             <span className="section-label">
@@ -137,7 +113,6 @@ const verifiedPlaces = places.filter(
         </div>
 
         <section className="admin-stats">
-
           <article className="admin-stat-card">
             <div className="admin-stat-icon">
               <MapPin size={22} />
@@ -181,11 +156,9 @@ const verifiedPlaces = places.filter(
               <span>Open Reports</span>
             </div>
           </article>
-
         </section>
 
         <section className="admin-section">
-
           <div className="admin-section-heading">
             <div>
               <span className="section-label">
@@ -197,7 +170,6 @@ const verifiedPlaces = places.filter(
           </div>
 
           <div className="admin-management-grid">
-
             <Link
               to="/admin/places"
               className="admin-management-card"
@@ -276,16 +248,13 @@ const verifiedPlaces = places.filter(
               </div>
 
               <span>
-                {reviews.length} reviews →
+                {reviewCount} reviews →
               </span>
             </Link>
-
           </div>
-
         </section>
 
         <section className="admin-section">
-
           <div className="admin-section-heading">
             <div>
               <span className="section-label">
@@ -304,7 +273,6 @@ const verifiedPlaces = places.filter(
           </div>
 
           <div className="admin-table-wrapper">
-
             <table className="admin-table">
               <thead>
                 <tr>
@@ -317,39 +285,42 @@ const verifiedPlaces = places.filter(
               </thead>
 
               <tbody>
-                {places.slice(0, 5).map((place) => (
-                  <tr key={place.id}>   
+                {places
+                  .slice(0, 5)
+                  .map((place) => (
+                    <tr key={place.id}>
+                      <td>
+                        <strong>
+                          {place.name}
+                        </strong>
+                      </td>
 
-                    <td><strong>{place.name}</strong></td>
+                      <td>{place.category}</td>
+                      <td>{place.city}</td>
 
-                    <td>{place.category}</td>
+                      <td>
+                        {place.ratingStars ?? '—'}
+                      </td>
 
-                    <td>{place.city}</td>
-
-                    <td>{place.ratingStars ?? '—'}</td>
-
-                    <td>
-                      <span
-                        className={
-                          place.verified
-                            ? 'admin-status verified'
-                            : 'admin-status pending'
-                        }
-                      >
-                        {place.verified
-                          ? 'Verified'
-                          : 'Pending'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                      <td>
+                        <span
+                          className={
+                            place.verified
+                              ? 'admin-status verified'
+                              : 'admin-status pending'
+                          }
+                        >
+                          {place.verified
+                            ? 'Verified'
+                            : 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
-
           </div>
-
         </section>
-
       </div>
     </main>
   )

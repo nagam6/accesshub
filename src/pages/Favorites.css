@@ -1,7 +1,6 @@
 .favorites-page {
   min-height: 100vh;
   padding: 65px 32px 90px;
-
   background-color: #f5f8f8;
 }
 
@@ -10,56 +9,45 @@
   margin: 0 auto;
 }
 
-/* HEADING */
+/* Heading */
 
 .favorites-heading {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-
   margin-bottom: 38px;
 }
 
 .favorites-heading-icon {
   width: 52px;
   height: 52px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 15px;
-
   background-color: #fdebea;
   color: #e63946;
 }
 
 .favorites-heading h1 {
   margin: 6px 0 10px;
-
   color: #102f3e;
-
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(2.4rem, 4vw, 3.5rem);
 }
 
 .favorites-heading p {
   margin: 0;
-
   color: #687b80;
-
   line-height: 1.6;
 }
 
-/* COUNT */
+/* Results */
 
 .favorites-results {
   margin-bottom: 20px;
-
   color: #62757a;
-
   font-size: 0.9rem;
 }
 
@@ -67,54 +55,41 @@
   margin: 0;
 }
 
-/* EMPTY STATE */
+/* Empty State */
 
 .favorites-empty {
   max-width: 600px;
-
   margin: 70px auto 0;
   padding: 55px 30px;
-
   border: 1px solid #dce5e5;
   border-radius: 20px;
-
   background-color: #ffffff;
-
   text-align: center;
 }
 
 .favorites-empty-icon {
   width: 68px;
   height: 68px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   margin: 0 auto 18px;
-
   border-radius: 50%;
-
   background-color: #fdebea;
   color: #e63946;
 }
 
 .favorites-empty h2 {
   margin: 0 0 10px;
-
   color: #173843;
-
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.7rem;
 }
 
 .favorites-empty p {
   max-width: 430px;
-
   margin: 0 auto 24px;
-
   color: #6b7d82;
-
   line-height: 1.6;
 }
 
@@ -123,14 +98,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-
   padding: 12px 18px;
-
   border-radius: 11px;
-
   background-color: #08777c;
   color: #ffffff;
-
   text-decoration: none;
   font-weight: 700;
 }
@@ -139,6 +110,8 @@
   background-color: #06666b;
 }
 
+/* Mobile */
+
 @media (max-width: 600px) {
   .favorites-page {
     padding: 45px 18px 70px;
@@ -146,5 +119,23 @@
 
   .favorites-heading {
     gap: 12px;
+  }
+
+  .favorites-heading-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .favorites-heading h1 {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .favorites-empty {
+    margin-top: 45px;
+    padding: 42px 20px;
+  }
+
+  .favorites-explore-button {
+    width: 100%;
   }
 }

@@ -2,17 +2,18 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Accessibility,
-  Mail,
-  Lock,
   Eye,
   EyeOff,
-  Shield
+  Lock,
+  Mail,
+  Shield,
 } from 'lucide-react'
 import {
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
 } from 'firebase/auth'
 
 import { auth } from '../firebase/firebase'
+
 import './Login.css'
 
 function Login() {
@@ -24,65 +25,64 @@ function Login() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-async function handleSubmit(event) {
-  event.preventDefault()
+  async function handleSubmit(event) {
+    event.preventDefault()
+    setMessage('')
 
-  setMessage('')
-
-  if (!email.trim() || !password.trim()) {
-    setMessage(
-      'Please enter your email and password.'
-    )
-    return
-  }
-
-  try {
-    setLoading(true)
-
-    await signInWithEmailAndPassword(
-      auth,
-      email.trim(),
-      password
-    )
-
-    navigate('/profile')
-  } catch (error) {
-    console.error('Login error:', error)
-
-    if (
-      error.code === 'auth/invalid-credential' ||
-      error.code === 'auth/wrong-password' ||
-      error.code === 'auth/user-not-found'
-    ) {
+    if (!email.trim() || !password.trim()) {
       setMessage(
-        'Incorrect email or password.'
+        'Please enter your email and password.'
       )
-    } else if (
-      error.code === 'auth/invalid-email'
-    ) {
-      setMessage(
-        'Please enter a valid email address.'
-      )
-    } else {
-      setMessage(
-        'Could not log in. Please try again.'
-      )
+      return
     }
-  } finally {
-    setLoading(false)
+
+    try {
+      setLoading(true)
+
+      await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      )
+
+      navigate('/profile')
+    } catch (error) {
+      console.error(
+        'Login error:',
+        error
+      )
+
+      if (
+        error.code === 'auth/invalid-credential' ||
+        error.code === 'auth/wrong-password' ||
+        error.code === 'auth/user-not-found'
+      ) {
+        setMessage(
+          'Incorrect email or password.'
+        )
+      } else if (
+        error.code === 'auth/invalid-email'
+      ) {
+        setMessage(
+          'Please enter a valid email address.'
+        )
+      } else {
+        setMessage(
+          'Could not log in. Please try again.'
+        )
+      }
+    } finally {
+      setLoading(false)
+    }
   }
-}
+
   function handleGuest() {
     navigate('/')
   }
 
   return (
     <main className="login-page">
-
-      {/* HEADER */}
-
       <div className="login-header">
-
         <div className="login-logo-icon">
           <Accessibility size={28} />
         </div>
@@ -90,15 +90,12 @@ async function handleSubmit(event) {
         <h1>Welcome Back</h1>
 
         <p>
-          Log in to access your favorites and preferences.
+          Log in to access your favorites and
+          preferences.
         </p>
-
       </div>
 
-      {/* LOGIN CARD */}
-
       <div className="login-card">
-
         {message && (
           <div className="login-message">
             {message}
@@ -106,9 +103,6 @@ async function handleSubmit(event) {
         )}
 
         <form onSubmit={handleSubmit}>
-
-          {/* EMAIL */}
-
           <div className="login-field">
             <label htmlFor="email">
               Email
@@ -129,15 +123,12 @@ async function handleSubmit(event) {
             </div>
           </div>
 
-          {/* PASSWORD */}
-
           <div className="login-field">
             <label htmlFor="password">
               Password
             </label>
 
             <div className="login-input-wrapper">
-
               <Lock size={18} />
 
               <input
@@ -174,41 +165,31 @@ async function handleSubmit(event) {
                   <Eye size={18} />
                 )}
               </button>
-
             </div>
           </div>
 
-          {/* OPTIONS */}
-
           <div className="login-options">
-
             <Link to="/forgot-password">
               Forgot password?
             </Link>
-
           </div>
 
-          {/* LOGIN */}
-
-<button
-  type="submit"
-  className="login-button"
-  disabled={loading}
->
-  {loading ? 'Logging in...' : 'Log In'}
-</button>
-
+          <button
+            type="submit"
+            className="login-button"
+            disabled={loading}
+          >
+            {loading
+              ? 'Logging in...'
+              : 'Log In'}
+          </button>
         </form>
 
-        {/* DIVIDER */}
-
         <div className="login-divider">
-          <span></span>
+          <span />
           <p>or</p>
-          <span></span>
+          <span />
         </div>
-
-        {/* GUEST */}
 
         <button
           type="button"
@@ -217,20 +198,14 @@ async function handleSubmit(event) {
         >
           Continue as Guest
         </button>
-
       </div>
-
-      {/* SIGN UP */}
 
       <p className="login-signup">
         Don't have an account?{' '}
-
         <Link to="/register">
           Sign up
         </Link>
       </p>
-
-      {/* ADMIN */}
 
       <Link
         to="/admin-login"
@@ -239,7 +214,6 @@ async function handleSubmit(event) {
         <Shield size={16} />
         Admin Login
       </Link>
-
     </main>
   )
 }

@@ -4,188 +4,218 @@ import {
   createUserWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth'
-
 import {
   doc,
   setDoc
 } from 'firebase/firestore'
-
-import {
-  auth,
-  db
-} from '../firebase/firebase'
-
+import { toast } from 'react-toastify'
 import {
   Accessibility,
-  UserRound,
-  Mail,
-  Lock,
   Eye,
   EyeOff,
-  UserPlus
+  Lock,
+  Mail,
+  UserPlus,
+  UserRound
 } from 'lucide-react'
+
+import { auth, db } from '../firebase/firebase'
 
 import './Register.css'
 
-function Register() {
-const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    accessibilityPreferences: [],
-  })
-
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  function handleChange(event) {
-    const { name, value } = event.target
-
-    setFormData((current) => ({
-      ...current,
-      [name]: value,
-    }))
-  }
-  const accessibilityPreferences = [
+const accessibilityPreferences = [
   'Wheelchair user',
   'Blind or low vision',
   'Deaf or hard of hearing',
   'Sensory sensitivity',
   'Need accessible restroom',
   'Need dedicated parking',
-  'Need quiet environment',
+  'Need quiet environment'
 ]
 
-function handlePreferenceChange(preference) {
-  setFormData((current) => {
-    const isSelected =
-      current.accessibilityPreferences.includes(preference)
+function Register() {
+  const navigate = useNavigate()
 
-    return {
-      ...current,
-      accessibilityPreferences: isSelected
-        ? current.accessibilityPreferences.filter(
-            (item) => item !== preference
-          )
-        : [
-            ...current.accessibilityPreferences,
-            preference,
-          ],
-    }
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    accessibilityPreferences: []
   })
-}
 
-async function handleSubmit(event) {
-  event.preventDefault()
+  const [showPassword, setShowPassword] =
+    useState(false)
 
-  setMessage('')
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword
+  ] = useState(false)
 
-  if (
-    !formData.fullName.trim() ||
-    !formData.email.trim() ||
-    !formData.password.trim() ||
-    !formData.confirmPassword.trim()
+  const [loading, setLoading] =
+    useState(false)
+
+  function handleChange(event) {
+    const { name, value } =
+      event.target
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value
+    }))
+  }
+
+  function handlePreferenceChange(
+    preference
   ) {
-    setMessage('Please complete all fields.')
-    return
-  }
+    setFormData((current) => {
+      const selected =
+        current.accessibilityPreferences
+          .includes(preference)
 
-  if (
-    formData.password !==
-    formData.confirmPassword
-  ) {
-    setMessage('Passwords do not match.')
-    return
-  }
+      return {
+        ...current,
 
-  if (formData.password.length < 6) {
-    setMessage(
-      'Password must be at least 6 characters.'
-    )
-    return
-  }
-
-  try {
-    setLoading(true)
-
-    // 1. Create Firebase Authentication account
-    const userCredential =
-      await createUserWithEmailAndPassword(
-        auth,
-        formData.email.trim(),
-        formData.password
-      )
-
-    const user = userCredential.user
-
-    // 2. Store the name in Firebase Authentication
-    await updateProfile(user, {
-      displayName: formData.fullName.trim(),
-    })
-
-    // 3. Create the Firestore user profile
-    await setDoc(
-      doc(db, 'users', user.uid),
-      {
-        uid: user.uid,
-        fullName: formData.fullName.trim(),
-        email: formData.email.trim(),
-        role: 'user',
         accessibilityPreferences:
-          formData.accessibilityPreferences,
-        createdAt: new Date().toISOString(),
+          selected
+            ? current
+                .accessibilityPreferences
+                .filter(
+                  (item) =>
+                    item !== preference
+                )
+            : [
+                ...current
+                  .accessibilityPreferences,
+                preference
+              ]
       }
-    )
+    })
+  }
 
-    setMessage(
-      'Account created successfully!'
-    )
-
-    navigate('/profile')
-  } catch (error) {
-    console.error(
-      'Registration error:',
-      error
-    )
+  async function handleSubmit(event) {
+    event.preventDefault()
 
     if (
-      error.code ===
-      'auth/email-already-in-use'
+      !formData.fullName.trim() ||
+      !formData.email.trim() ||
+      !formData.password.trim() ||
+      !formData.confirmPassword.trim()
     ) {
-      setMessage(
-        'An account already exists with this email.'
+      toast.warning(
+        'Please complete all fields.'
       )
-    } else if (
-      error.code === 'auth/invalid-email'
-    ) {
-      setMessage(
-        'Please enter a valid email address.'
-      )
-    } else if (
-      error.code === 'auth/weak-password'
-    ) {
-      setMessage(
-        'Please choose a stronger password.'
-      )
-    } else {
-      setMessage(
-        'Could not create your account. Please try again.'
-      )
+      return
     }
-  } finally {
-    setLoading(false)
+
+    if (
+      formData.password !==
+      formData.confirmPassword
+    ) {
+      toast.warning(
+        'Passwords do not match.'
+      )
+      return
+    }
+
+    if (
+      formData.password.length < 6
+    ) {
+      toast.warning(
+        'Password must be at least 6 characters.'
+      )
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const userCredential =
+        await createUserWithEmailAndPassword(
+          auth,
+          formData.email.trim(),
+          formData.password
+        )
+
+      const user =
+        userCredential.user
+
+      await updateProfile(user, {
+        displayName:
+          formData.fullName.trim()
+      })
+
+      await setDoc(
+        doc(
+          db,
+          'users',
+          user.uid
+        ),
+        {
+          uid: user.uid,
+
+          fullName:
+            formData.fullName.trim(),
+
+          email:
+            formData.email.trim(),
+
+          role: 'user',
+
+          accessibilityPreferences:
+            formData
+              .accessibilityPreferences,
+
+          createdAt:
+            new Date().toISOString()
+        }
+      )
+
+      toast.success(
+        'Account created successfully!'
+      )
+
+      navigate('/profile')
+    } catch (error) {
+      console.error(
+        'Registration error:',
+        error
+      )
+
+      if (
+        error.code ===
+        'auth/email-already-in-use'
+      ) {
+        toast.error(
+          'An account already exists with this email.'
+        )
+      } else if (
+        error.code ===
+        'auth/invalid-email'
+      ) {
+        toast.warning(
+          'Please enter a valid email address.'
+        )
+      } else if (
+        error.code ===
+        'auth/weak-password'
+      ) {
+        toast.warning(
+          'Please choose a stronger password.'
+        )
+      } else {
+        toast.error(
+          'Could not create your account. Please try again.'
+        )
+      }
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   return (
     <main className="register-page">
-
-      <div className="register-header">
-
+      <header className="register-header">
         <div className="register-logo-icon">
           <Accessibility size={28} />
         </div>
@@ -193,21 +223,13 @@ async function handleSubmit(event) {
         <h1>Create Your Account</h1>
 
         <p>
-          Join AccessHub to save favorites and share your experience.
+          Join AccessHub to save favorites
+          and share your experience.
         </p>
+      </header>
 
-      </div>
-
-      <div className="register-card">
-
-        {message && (
-          <div className="register-message">
-            {message}
-          </div>
-        )}
-
+      <section className="register-card">
         <form onSubmit={handleSubmit}>
-
           <div className="register-field">
             <label htmlFor="fullName">
               Full name
@@ -257,7 +279,11 @@ async function handleSubmit(event) {
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={
+                  showPassword
+                    ? 'text'
+                    : 'password'
+                }
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Create a password"
@@ -267,7 +293,9 @@ async function handleSubmit(event) {
                 type="button"
                 className="register-password-toggle"
                 onClick={() =>
-                  setShowPassword((current) => !current)
+                  setShowPassword(
+                    (current) => !current
+                  )
                 }
                 aria-label={
                   showPassword
@@ -295,8 +323,14 @@ async function handleSubmit(event) {
               <input
                 id="confirmPassword"
                 name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
+                type={
+                  showConfirmPassword
+                    ? 'text'
+                    : 'password'
+                }
+                value={
+                  formData.confirmPassword
+                }
                 onChange={handleChange}
                 placeholder="Repeat your password"
               />
@@ -305,7 +339,9 @@ async function handleSubmit(event) {
                 type="button"
                 className="register-password-toggle"
                 onClick={() =>
-                  setShowConfirmPassword((current) => !current)
+                  setShowConfirmPassword(
+                    (current) => !current
+                  )
                 }
                 aria-label={
                   showConfirmPassword
@@ -321,70 +357,84 @@ async function handleSubmit(event) {
               </button>
             </div>
           </div>
-<div className="register-preferences">
 
-  <div className="register-preferences-heading">
-    <h3>
-      Accessibility Preferences
-      <span> (optional)</span>
-    </h3>
+          <section className="register-preferences">
+            <div className="register-preferences-heading">
+              <h3>
+                Accessibility Preferences
+                <span> (optional)</span>
+              </h3>
 
-    <p>
-      Helps us calculate your match score automatically.
-    </p>
-  </div>
+              <p>
+                Helps us calculate your
+                match score automatically.
+              </p>
+            </div>
 
-  <div className="register-preferences-grid">
+            <div className="register-preferences-grid">
+              {accessibilityPreferences.map(
+                (preference) => {
+                  const selected =
+                    formData
+                      .accessibilityPreferences
+                      .includes(
+                        preference
+                      )
 
-    {accessibilityPreferences.map((preference) => (
-      <label
-        key={preference}
-        className={`register-preference-option ${
-          formData.accessibilityPreferences.includes(preference)
-            ? 'selected'
-            : ''
-        }`}
-      >
-        <input
-          type="checkbox"
-          checked={formData.accessibilityPreferences.includes(
-            preference
-          )}
-          onChange={() =>
-            handlePreferenceChange(preference)
-          }
-        />
+                  return (
+                    <label
+                      key={preference}
+                      className={`register-preference-option ${
+                        selected
+                          ? 'selected'
+                          : ''
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          handlePreferenceChange(
+                            preference
+                          )
+                        }
+                      />
 
-        <span>{preference}</span>
-      </label>
-    ))}
+                      <span>
+                        {preference}
+                      </span>
+                    </label>
+                  )
+                }
+              )}
+            </div>
+          </section>
 
-  </div>
-
-</div>
           <label className="register-terms">
-            <input type="checkbox" required />
+            <input
+              type="checkbox"
+              required
+            />
 
             <span>
-              I agree to the community guidelines and terms of use.
+              I agree to the community
+              guidelines and terms of use.
             </span>
           </label>
 
-  <button
-  type="submit"
-  className="register-submit-button"
-  disabled={loading}
->
-  <UserPlus size={18} />
+          <button
+            type="submit"
+            className="register-submit-button"
+            disabled={loading}
+          >
+            <UserPlus size={18} />
 
-  {loading
-    ? 'Creating Account...'
-    : 'Create Account'}
-</button>
-
+            {loading
+              ? 'Creating Account...'
+              : 'Create Account'}
+          </button>
         </form>
-
-      </div>
+      </section>
 
       <p className="register-login-link">
         Already have an account?{' '}
@@ -393,7 +443,6 @@ async function handleSubmit(event) {
           Log in
         </Link>
       </p>
-
     </main>
   )
 }

@@ -1,32 +1,26 @@
 import { useState } from 'react'
-import {
-  Link,
-  useNavigate
-} from 'react-router-dom'
-
+import { Link, useNavigate } from 'react-router-dom'
 import {
   signInWithEmailAndPassword,
-  signOut
+  signOut,
 } from 'firebase/auth'
-
 import {
   doc,
-  getDoc
+  getDoc,
 } from 'firebase/firestore'
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  Shield,
+} from 'lucide-react'
 
 import {
   auth,
-  db
+  db,
 } from '../firebase/firebase'
-
-import {
-  Shield,
-  Mail,
-  Lock,
-  ArrowRight,
-  Eye,
-  EyeOff
-} from 'lucide-react'
 
 import './AdminLogin.css'
 
@@ -40,10 +34,7 @@ function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(event) {
-    
     event.preventDefault()
-    console.log('ADMIN FORM SUBMITTED')
-
     setMessage('')
 
     if (!email.trim() || !password.trim()) {
@@ -56,7 +47,6 @@ function AdminLogin() {
     try {
       setLoading(true)
 
-      // 1. Login with Firebase Authentication
       const userCredential =
         await signInWithEmailAndPassword(
           auth,
@@ -66,12 +56,6 @@ function AdminLogin() {
 
       const user = userCredential.user
 
-      console.log(
-        'ADMIN AUTH UID:',
-        user.uid
-      )
-
-      // 2. Read the matching Firestore user document
       const adminRef = doc(
         db,
         'users',
@@ -82,53 +66,31 @@ function AdminLogin() {
         await getDoc(adminRef)
 
       if (!adminSnapshot.exists()) {
-        console.log(
-          'No Firestore user document found for:',
-          user.uid
-        )
-
         await signOut(auth)
 
         setMessage(
           'Administrator profile was not found.'
         )
-
         return
       }
 
       const adminData =
         adminSnapshot.data()
 
-      console.log(
-        'ADMIN FIRESTORE DATA:',
-        adminData
+      const role = String(
+        adminData.role || ''
       )
-
-      // 3. Check admin role
-      const role =
-        String(adminData.role || '')
-          .trim()
-          .toLowerCase()
+        .trim()
+        .toLowerCase()
 
       if (role !== 'admin') {
-        console.log(
-          'ROLE FOUND:',
-          role
-        )
-
         await signOut(auth)
 
         setMessage(
           'This account does not have administrator access.'
         )
-
         return
       }
-
-      // 4. Admin verified
-      console.log(
-        'ADMIN ACCESS GRANTED'
-      )
 
       navigate('/admin')
     } catch (error) {
@@ -138,12 +100,9 @@ function AdminLogin() {
       )
 
       if (
-        error.code ===
-          'auth/invalid-credential' ||
-        error.code ===
-          'auth/wrong-password' ||
-        error.code ===
-          'auth/user-not-found'
+        error.code === 'auth/invalid-credential' ||
+        error.code === 'auth/wrong-password' ||
+        error.code === 'auth/user-not-found'
       ) {
         setMessage(
           'Incorrect admin email or password.'
@@ -166,9 +125,7 @@ function AdminLogin() {
 
   return (
     <main className="admin-login-page">
-
       <div className="admin-login-container">
-
         <div className="admin-login-icon">
           <Shield size={30} />
         </div>
@@ -185,7 +142,6 @@ function AdminLogin() {
           className="admin-login-card"
           onSubmit={handleSubmit}
         >
-
           {message && (
             <div className="admin-login-message">
               {message}
@@ -193,13 +149,11 @@ function AdminLogin() {
           )}
 
           <div className="admin-login-field">
-
             <label htmlFor="admin-email">
               Admin Email
             </label>
 
             <div className="admin-login-input-wrapper">
-
               <Mail size={18} />
 
               <input
@@ -211,57 +165,61 @@ function AdminLogin() {
                 }
                 placeholder="admin@gmail.com"
               />
-
             </div>
-
           </div>
 
           <div className="admin-login-field">
-
             <label htmlFor="admin-password">
               Password
             </label>
 
             <div className="admin-password-wrapper">
-
               <Lock size={18} />
 
-           <input
-    type={showPassword ? 'text' : 'password'}
-    name="password"
-    value={password}
-    onChange={(event) =>
-      setPassword(event.target.value)
-    }
+              <input
+                id="admin-password"
+                type={
+                  showPassword
+                    ? 'text'
+                    : 'password'
+                }
+                value={password}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
                 placeholder="••••••••"
               />
-<button
-    type="button"
-    className="admin-password-toggle"
-    onClick={() =>
-      setShowPassword((current) => !current)
-    }
-    aria-label={
-      showPassword
-        ? 'Hide password'
-        : 'Show password'
-    }
-  >
-    {showPassword ? (
-      <EyeOff size={19} />
-    ) : (
-      <Eye size={19} />
-    )}
-  </button>
-            </div>
 
+              <button
+                type="button"
+                className="admin-password-toggle"
+                onClick={() =>
+                  setShowPassword(
+                    (current) => !current
+                  )
+                }
+                aria-label={
+                  showPassword
+                    ? 'Hide password'
+                    : 'Show password'
+                }
+              >
+                {showPassword ? (
+                  <EyeOff size={19} />
+                ) : (
+                  <Eye size={19} />
+                )}
+              </button>
+            </div>
           </div>
-<Link
-  to="/forgot-password"
-  className="admin-forgot-password"
->
-  Forgot password?
-</Link>
+
+          <Link
+            to="/forgot-password"
+            className="admin-forgot-password"
+          >
+            Forgot password?
+          </Link>
+
           <button
             type="submit"
             className="admin-login-button"
@@ -275,7 +233,6 @@ function AdminLogin() {
               <ArrowRight size={18} />
             )}
           </button>
-
         </form>
 
         <Link
@@ -284,9 +241,7 @@ function AdminLogin() {
         >
           ← Back to site
         </Link>
-
       </div>
-
     </main>
   )
 }

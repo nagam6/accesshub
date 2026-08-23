@@ -6,10 +6,7 @@ export function showLoginToast(navigate) {
       <div className="login-toast-content">
         <div>
           <strong>Log in required</strong>
-
-          <p>
-            Please log in to use this feature.
-          </p>
+          <p>Please log in to use this feature.</p>
         </div>
 
         <button

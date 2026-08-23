@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-
+import {
+  CheckCircle2,
+  Clock3,
+  Flag,
+  XCircle,
+} from 'lucide-react'
 import {
   collection,
   doc,
   getDocs,
-  updateDoc
+  updateDoc,
 } from 'firebase/firestore'
+import { toast } from 'react-toastify'
 
 import { db } from '../firebase/firebase'
-
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Flag,
-  XCircle,
-  Clock3
-} from 'lucide-react'
 
 import './AdminReports.css'
 
@@ -88,13 +86,19 @@ function AdminReports() {
             : report
         )
       )
+
+      toast.success(
+        newStatus === 'resolved'
+          ? 'Report marked as resolved.'
+          : 'Report dismissed.'
+      )
     } catch (error) {
       console.error(
         'Error updating report:',
         error
       )
 
-      alert(
+      toast.error(
         'Could not update the report.'
       )
     }
@@ -130,13 +134,11 @@ function AdminReports() {
   return (
     <main className="admin-reports-page">
       <div className="admin-reports-container">
-
         <Link
           to="/admin"
           className="admin-back-link"
         >
-          <ArrowLeft size={18} />
-          Back to Dashboard
+          ← Back to Dashboard
         </Link>
 
         <div className="admin-reports-heading">
@@ -162,14 +164,12 @@ function AdminReports() {
           </div>
         ) : (
           <div className="admin-reports-list">
-
             {reports.map((report) => (
               <article
                 key={report.firestoreId}
                 className="admin-report-card"
               >
                 <div className="admin-report-top">
-
                   <div>
                     <div className="admin-report-title">
                       <Flag size={20} />
@@ -188,7 +188,6 @@ function AdminReports() {
                   </div>
 
                   {renderStatus(report.status)}
-
                 </div>
 
                 <div className="admin-report-reason">
@@ -196,13 +195,10 @@ function AdminReports() {
                     Reported issue
                   </strong>
 
-                  <p>
-                    {report.reason}
-                  </p>
+                  <p>{report.reason}</p>
                 </div>
 
                 <div className="admin-report-footer">
-
                   <span>
                     {report.createdAt
                       ? new Date(
@@ -213,7 +209,6 @@ function AdminReports() {
 
                   {report.status === 'open' && (
                     <div className="admin-report-actions">
-
                       <button
                         type="button"
                         className="report-dismiss-button"
@@ -241,18 +236,13 @@ function AdminReports() {
                         <CheckCircle2 size={16} />
                         Resolve
                       </button>
-
                     </div>
                   )}
-
                 </div>
-
               </article>
             ))}
-
           </div>
         )}
-
       </div>
     </main>
   )

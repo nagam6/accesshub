@@ -2,13 +2,9 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 function AdminRoute({ children }) {
-  const {
-    user,
-    userRole,
-    authLoading
-  } = useAuth()
+  const {user, userRole, authLoading} = useAuth()
 
-  // Wait until Firebase restores the session
+ // Wait until Firebase restores the authentication session
   if (authLoading) {
     return (
       <div
@@ -26,7 +22,6 @@ function AdminRoute({ children }) {
     )
   }
 
-  // Not logged in
   if (!user) {
     return (
       <Navigate
@@ -36,7 +31,6 @@ function AdminRoute({ children }) {
     )
   }
 
-  // Logged in, but not an admin
   if (userRole !== 'admin') {
     return (
       <Navigate
@@ -45,8 +39,6 @@ function AdminRoute({ children }) {
       />
     )
   }
-
-  // Valid admin
   return children
 }
 

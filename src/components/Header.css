@@ -8,7 +8,6 @@
   width: 100%;
   max-width: 1550px;
   min-height: 94px;
-
   margin: 0 auto;
   padding: 0 38px;
 
@@ -24,7 +23,6 @@
   display: flex;
   align-items: center;
   gap: 13px;
-
   text-decoration: none;
 }
 
@@ -35,9 +33,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
   border-radius: 15px;
-
   background-color: #08777c;
   color: #ffffff;
 }
@@ -49,7 +47,6 @@
 
 .brand-name {
   color: #07636a;
-
   font-size: 1.35rem;
   font-weight: 800;
   line-height: 1.1;
@@ -57,9 +54,7 @@
 
 .brand-tagline {
   margin-top: 5px;
-
   color: #6d7c80;
-
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.07em;
@@ -71,7 +66,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   gap: 8px;
 }
 
@@ -81,7 +75,6 @@
   gap: 7px;
 
   padding: 13px 15px;
-
   border-radius: 18px;
 
   color: #252d30;
@@ -89,47 +82,36 @@
 
   font-size: 0.96rem;
   font-weight: 500;
+  white-space: nowrap;
 
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
 }
 
-/* Hover - NO underline */
-
 .nav-link:hover {
   background-color: #f0f6f6;
   color: #08777c;
 }
-
-/* Current page */
 
 .nav-link.active {
   background-color: #e5f0f0;
   color: #08777c;
 }
 
-/* Important: remove old underline */
-
 .nav-link::after,
 .nav-link.active::after {
   display: none;
 }
 
-/* Login */
+/* Account actions */
 
-.header-login-link{
-  display: flex;
+.header-login-link,
+.header-account-link {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-
-  padding: 14px 22px;
-
-  border-radius: 15px;
-
-  background-color: #006c72;
-  color: #ffffff;
 
   text-decoration: none;
   font-weight: 700;
@@ -140,62 +122,99 @@
     box-shadow 0.2s ease;
 }
 
-
-.header-account-link
- {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-
-  text-decoration: none;
-  font-weight: 700;
-
-    transition:
-    transform 0.2s ease,
-    opacity 0.2s ease
-    box-shadow 0.2s ease;
+.header-login-link {
+  padding: 14px 22px;
+  border-radius: 15px;
+  background-color: #006c72;
+  color: #ffffff;
 }
+
+.header-account-link {
+  color: #08777c;
+}
+
 .header-login-link:hover,
 .header-account-link:hover {
   transform: translateY(-2px);
   opacity: 0.9;
 }
-/* Responsive */
+
+/* Tablet */
 
 @media (max-width: 1050px) {
   .header-container {
-    grid-template-columns: auto auto;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    padding: 18px 24px 0;
   }
 
   .main-nav {
     grid-column: 1 / -1;
     grid-row: 2;
 
+    justify-content: flex-start;
+
     padding-bottom: 14px;
 
     overflow-x: auto;
-    justify-content: flex-start;
+    scrollbar-width: thin;
+  }
+
+  .header-login-link,
+  .header-account-link {
+    justify-self: end;
   }
 }
 
+/* Mobile */
+
 @media (max-width: 600px) {
   .header-container {
-    padding: 14px 18px;
+    min-height: auto;
+    padding: 14px 18px 0;
+    gap: 14px;
+  }
+
+  .brand {
+    gap: 9px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+
+  .brand-name {
+    font-size: 1.15rem;
   }
 
   .brand-tagline {
     display: none;
   }
 
-  .login-button span {
-    display: none;
+  .header-login-link,
+  .header-account-link {
+    padding: 11px 13px;
+    font-size: 0.88rem;
   }
 
-  .login-button {
-    padding: 13px;
+  .header-account-link {
+    gap: 6px;
+  }
+
+  .main-nav {
+    gap: 6px;
+    padding-bottom: 12px;
   }
 
   .nav-link {
-    white-space: nowrap;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
+
+  .nav-link svg {
+    width: 17px;
+    height: 17px;
   }
 }

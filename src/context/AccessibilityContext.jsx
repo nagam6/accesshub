@@ -2,11 +2,10 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState
+  useState,
 } from 'react'
 
-const AccessibilityContext =
-  createContext()
+const AccessibilityContext = createContext()
 
 const defaultSettings = {
   textSize: 'normal',
@@ -15,36 +14,33 @@ const defaultSettings = {
   reduceMotion: false,
 }
 
-export function AccessibilityProvider({
-  children
-}) {
-const [settings, setSettings] = useState(() => {
-  const savedSettings =
-    sessionStorage.getItem(
+export function AccessibilityProvider({ children }) {
+  const [settings, setSettings] = useState(() => {
+    const savedSettings = sessionStorage.getItem(
       'accesshub-accessibility'
     )
 
-  if (!savedSettings) {
-    return defaultSettings
-  }
+    if (!savedSettings) {
+      return defaultSettings
+    }
 
-  try {
-    return JSON.parse(savedSettings)
-  } catch {
-    return defaultSettings
-  }
-})
+    try {
+      return JSON.parse(savedSettings)
+    } catch {
+      return defaultSettings
+    }
+  })
 
   useEffect(() => {
-      sessionStorage.setItem(
-    'accesshub-accessibility',
-    JSON.stringify(settings)
-  )
-    const root =
-      document.documentElement
+    // Keep accessibility preferences during the current browser session.
+    sessionStorage.setItem(
+      'accesshub-accessibility',
+      JSON.stringify(settings)
+    )
 
-    root.dataset.textSize =
-      settings.textSize
+    const root = document.documentElement
+
+    root.dataset.textSize = settings.textSize
 
     root.classList.toggle(
       'access-high-contrast',
@@ -72,24 +68,21 @@ const [settings, setSettings] = useState(() => {
   function toggleHighContrast() {
     setSettings((current) => ({
       ...current,
-      highContrast:
-        !current.highContrast,
+      highContrast: !current.highContrast,
     }))
   }
 
   function toggleGrayscale() {
     setSettings((current) => ({
       ...current,
-      grayscale:
-        !current.grayscale,
+      grayscale: !current.grayscale,
     }))
   }
 
   function toggleReduceMotion() {
     setSettings((current) => ({
       ...current,
-      reduceMotion:
-        !current.reduceMotion,
+      reduceMotion: !current.reduceMotion,
     }))
   }
 
@@ -118,7 +111,5 @@ const [settings, setSettings] = useState(() => {
 }
 
 export function useAccessibility() {
-  return useContext(
-    AccessibilityContext
-  )
+  return useContext(AccessibilityContext)
 }

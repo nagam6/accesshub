@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-
+import {
+  CheckCircle2,
+  Clock3,
+  XCircle,
+} from 'lucide-react'
 import {
   collection,
   doc,
   getDocs,
   updateDoc,
-  writeBatch
+  writeBatch,
 } from 'firebase/firestore'
+import { toast } from 'react-toastify'
 
 import { db } from '../firebase/firebase'
-
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Clock3,
-  XCircle
-} from 'lucide-react'
 
 import './AdminSuggestions.css'
 
@@ -61,59 +59,55 @@ function AdminSuggestions() {
   }, [])
 
   function buildAccessibilityData(features = []) {
-  const has = (feature) =>
-    features.includes(feature)
+    const has = (feature) =>
+      features.includes(feature)
 
-  return {
-    mobility: [
-      has('Wheelchair Access') && {
-        name: 'Wheelchair access',
-        status: 'available',
-      },
+    return {
+      mobility: [
+        has('Wheelchair Access') && {
+          name: 'Wheelchair access',
+          status: 'available',
+        },
+        has('Step-free Entrance') && {
+          name: 'Step-free entrance',
+          status: 'available',
+        },
+        has('Elevator') && {
+          name: 'Elevator',
+          status: 'available',
+        },
+        has('Accessible Restroom') && {
+          name: 'Accessible restroom',
+          status: 'available',
+        },
+        has('Accessible Parking') && {
+          name: 'Accessible parking',
+          status: 'available',
+        },
+      ].filter(Boolean),
 
-      has('Step-free Entrance') && {
-        name: 'Step-free entrance',
-        status: 'available',
-      },
+      visual: [
+        has('Visual Accessibility') && {
+          name: 'Visual accessibility',
+          status: 'available',
+        },
+      ].filter(Boolean),
 
-      has('Elevator') && {
-        name: 'Elevator',
-        status: 'available',
-      },
+      hearing: [
+        has('Hearing Accessibility') && {
+          name: 'Hearing accessibility',
+          status: 'available',
+        },
+      ].filter(Boolean),
 
-      has('Accessible Restroom') && {
-        name: 'Accessible restroom',
-        status: 'available',
-      },
-
-      has('Accessible Parking') && {
-        name: 'Accessible parking',
-        status: 'available',
-      },
-    ].filter(Boolean),
-
-    visual: [
-      has('Visual Accessibility') && {
-        name: 'Visual accessibility',
-        status: 'available',
-      },
-    ].filter(Boolean),
-
-    hearing: [
-      has('Hearing Accessibility') && {
-        name: 'Hearing accessibility',
-        status: 'available',
-      },
-    ].filter(Boolean),
-
-    sensory: [
-      has('Quiet Environment') && {
-        name: 'Quiet environment',
-        status: 'available',
-      },
-    ].filter(Boolean),
+      sensory: [
+        has('Quiet Environment') && {
+          name: 'Quiet environment',
+          status: 'available',
+        },
+      ].filter(Boolean),
+    }
   }
-}
 
   async function handleStatusChange(
     suggestionId,
@@ -143,13 +137,19 @@ function AdminSuggestions() {
             : suggestion
         )
       )
+
+      toast.success(
+        newStatus === 'rejected'
+          ? 'Suggestion rejected.'
+          : 'Suggestion updated.'
+      )
     } catch (error) {
       console.error(
         'Error updating suggestion:',
         error
       )
 
-      alert(
+      toast.error(
         'Could not update the suggestion.'
       )
     }
@@ -182,121 +182,115 @@ function AdminSuggestions() {
     )
   }
 
-async function handleApprove(suggestion) {
-  try {
-    const newPlaceRef = doc(
-      collection(db, 'places')
-    )
-
-    const placeData = {
-      name: suggestion.name || '',
-      category: suggestion.category || '',
-      city: suggestion.city || '',
-      address: suggestion.address || '',
-      description: suggestion.description || '',
-
-      ratingStars: 0,
-      reviews: 0,
-
-      verified: false,
-
-      updatedAt:
-        new Date().toISOString().split('T')[0],
-
-      accessibilityMatch: 0,
-
-      accessibility:
-        buildAccessibilityData(
-          suggestion.accessibility || []
-        ),
-
-      visitInfo: {
-        parking:
-          suggestion.accessibility?.includes(
-            'Accessible Parking'
-          )
-            ? 'Accessible parking reported by the community.'
-            : '',
-
-        entrance:
-          suggestion.accessibility?.includes(
-            'Step-free Entrance'
-          )
-            ? 'Step-free entrance reported by the community.'
-            : '',
-
-        hours: '',
-        phone: '',
-        website: '',
-        transport: '',
-      },
-    }
-
-    const batch = writeBatch(db)
-
-    batch.set(
-      newPlaceRef,
-      placeData
-    )
-
-    batch.update(
-      doc(
-        db,
-        'suggestions',
-        suggestion.firestoreId
-      ),
-      {
-        status: 'approved',
-
-        reviewedAt:
-          new Date().toISOString(),
-
-        approvedPlaceId:
-          newPlaceRef.id,
-      }
-    )
-
-    await batch.commit()
-
-    setSuggestions((current) =>
-      current.map((item) =>
-        item.firestoreId ===
-        suggestion.firestoreId
-          ? {
-              ...item,
-              status: 'approved',
-              approvedPlaceId:
-                newPlaceRef.id,
-            }
-          : item
+  async function handleApprove(suggestion) {
+    try {
+      const newPlaceRef = doc(
+        collection(db, 'places')
       )
-    )
 
-    alert(
-      `"${suggestion.name}" was approved and added to Places.`
-    )
-  } catch (error) {
-    console.error(
-      'Error approving suggestion:',
-      error
-    )
+      const placeData = {
+        name: suggestion.name || '',
+        category: suggestion.category || '',
+        city: suggestion.city || '',
+        address: suggestion.address || '',
+        description: suggestion.description || '',
 
-    alert(
-      'Could not approve this suggestion.'
-    )
+        ratingStars: 0,
+        reviews: 0,
+        verified: false,
+
+        updatedAt:
+          new Date().toISOString().split('T')[0],
+
+        accessibilityMatch: 0,
+
+        accessibility:
+          buildAccessibilityData(
+            suggestion.accessibility || []
+          ),
+
+        visitInfo: {
+          parking:
+            suggestion.accessibility?.includes(
+              'Accessible Parking'
+            )
+              ? 'Accessible parking reported by the community.'
+              : '',
+
+          entrance:
+            suggestion.accessibility?.includes(
+              'Step-free Entrance'
+            )
+              ? 'Step-free entrance reported by the community.'
+              : '',
+
+          hours: '',
+          phone: '',
+          website: '',
+          transport: '',
+        },
+      }
+
+      const batch = writeBatch(db)
+
+      batch.set(
+        newPlaceRef,
+        placeData
+      )
+
+      batch.update(
+        doc(
+          db,
+          'suggestions',
+          suggestion.firestoreId
+        ),
+        {
+          status: 'approved',
+          reviewedAt:
+            new Date().toISOString(),
+          approvedPlaceId:
+            newPlaceRef.id,
+        }
+      )
+
+      await batch.commit()
+
+      setSuggestions((current) =>
+        current.map((item) =>
+          item.firestoreId === suggestion.firestoreId
+            ? {
+                ...item,
+                status: 'approved',
+                approvedPlaceId:
+                  newPlaceRef.id,
+              }
+            : item
+        )
+      )
+
+      toast.success(
+        `"${suggestion.name}" was approved and added to Places.`
+      )
+    } catch (error) {
+      console.error(
+        'Error approving suggestion:',
+        error
+      )
+
+      toast.error(
+        'Could not approve this suggestion.'
+      )
+    }
   }
-}  
 
   return (
     <main className="admin-suggestions-page">
       <div className="admin-suggestions-container">
-
         <Link
           to="/admin"
           className="admin-back-link"
         >
-          <ArrowLeft size={18} />
-          Back to Dashboard
+          ← Back to Dashboard
         </Link>
 
         <div className="admin-suggestions-heading">
@@ -321,14 +315,12 @@ async function handleApprove(suggestion) {
           </div>
         ) : (
           <div className="admin-suggestions-list">
-
             {suggestions.map((suggestion) => (
               <article
                 key={suggestion.firestoreId}
                 className="admin-suggestion-card"
               >
                 <div className="admin-suggestion-main">
-
                   <div>
                     <h2>{suggestion.name}</h2>
 
@@ -339,16 +331,13 @@ async function handleApprove(suggestion) {
                     </p>
 
                     {suggestion.address && (
-                      <p>
-                        {suggestion.address}
-                      </p>
+                      <p>{suggestion.address}</p>
                     )}
                   </div>
 
                   {getStatusBadge(
                     suggestion.status
                   )}
-
                 </div>
 
                 {suggestion.description && (
@@ -388,7 +377,6 @@ async function handleApprove(suggestion) {
 
                 {suggestion.status === 'pending' && (
                   <div className="admin-suggestion-actions">
-
                     <button
                       type="button"
                       className="suggestion-reject-button"
@@ -406,23 +394,19 @@ async function handleApprove(suggestion) {
                     <button
                       type="button"
                       className="suggestion-approve-button"
-                   onClick={() =>
-  handleApprove(suggestion)
-}
+                      onClick={() =>
+                        handleApprove(suggestion)
+                      }
                     >
                       <CheckCircle2 size={17} />
                       Approve
                     </button>
-
                   </div>
                 )}
-
               </article>
             ))}
-
           </div>
         )}
-
       </div>
     </main>
   )

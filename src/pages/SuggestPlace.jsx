@@ -1,162 +1,183 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { showLoginToast } from '../utils/showLoginToast'
-
 import {
   addDoc,
   collection
 } from 'firebase/firestore'
-
 import {
-  auth,
-  db
-} from '../firebase/firebase'
-import {
-  MapPin,
-  Building2,
   Accessibility,
-  CheckCircle2,
+  Building2,
+  MapPin,
   Send
 } from 'lucide-react'
 
+import { auth, db } from '../firebase/firebase'
+import { showLoginToast } from '../utils/showLoginToast'
+
 import './SuggestPlace.css'
+
+const accessibilityOptions = [
+  'Wheelchair Access',
+  'Step-free Entrance',
+  'Elevator',
+  'Accessible Restroom',
+  'Accessible Parking',
+  'Visual Accessibility',
+  'Hearing Accessibility',
+  'Quiet Environment'
+]
 
 function SuggestPlace() {
   const navigate = useNavigate()
-const [submitting, setSubmitting] = useState(false)
+
+  const [submitting, setSubmitting] =
+    useState(false)
+
+  const [submitted, setSubmitted] =
+    useState(false)
+
   const [formData, setFormData] = useState({
     name: '',
     city: '',
     category: '',
     address: '',
     description: '',
-    accessibility: [],
+    accessibility: []
   })
 
-  const [submitted, setSubmitted] = useState(false)
-
-  const accessibilityOptions = [
-    'Wheelchair Access',
-    'Step-free Entrance',
-    'Elevator',
-    'Accessible Restroom',
-    'Accessible Parking',
-    'Visual Accessibility',
-    'Hearing Accessibility',
-    'Quiet Environment',
-  ]
-
   function handleChange(event) {
-    const { name, value } = event.target
+    const { name, value } =
+      event.target
 
     setFormData((current) => ({
       ...current,
-      [name]: value,
+      [name]: value
     }))
   }
 
-  function handleAccessibilityChange(feature) {
+  function handleAccessibilityChange(
+    feature
+  ) {
     setFormData((current) => {
-      const alreadySelected =
-        current.accessibility.includes(feature)
+      const selected =
+        current.accessibility.includes(
+          feature
+        )
 
       return {
         ...current,
-        accessibility: alreadySelected
+
+        accessibility: selected
           ? current.accessibility.filter(
-              (item) => item !== feature
+              (item) =>
+                item !== feature
             )
-          : [...current.accessibility, feature],
+          : [
+              ...current.accessibility,
+              feature
+            ]
       }
     })
   }
 
-async function handleSubmit(event) {
-  event.preventDefault()
+  async function handleSubmit(event) {
+    event.preventDefault()
 
-  if (
-    !formData.name.trim() ||
-    !formData.city.trim() ||
-    !formData.category.trim()
-  ) {
-    alert(
-      'Please complete the required fields before submitting.'
-    )
-    return
-  }
-if (!auth.currentUser) {
-  showLoginToast(navigate)
-  return
-}
-
-  try {
-    setSubmitting(true)
-
-    const suggestionData = {
-      userId: auth.currentUser.uid,
-
-      userName:
-        auth.currentUser.displayName ||
-        auth.currentUser.email ||
-        'AccessHub User',
-
-      userEmail:
-        auth.currentUser.email || '',
-
-      name: formData.name.trim(),
-      city: formData.city.trim(),
-      category: formData.category,
-      address: formData.address.trim(),
-      description: formData.description.trim(),
-
-      accessibility:
-        formData.accessibility,
-
-      status: 'pending',
-
-      createdAt:
-        new Date().toISOString(),
+    if (
+      !formData.name.trim() ||
+      !formData.city.trim() ||
+      !formData.category.trim()
+    ) {
+      toast.warning(
+        'Please complete the required fields before submitting.'
+      )
+      return
     }
 
-    await addDoc(
-      collection(db, 'suggestions'),
-      suggestionData
-    )
-toast.success(
-  'Suggestion submitted successfully! It has been sent to our team for review.',
-  {
-    autoClose: 4000,
-  }
-)
-    setSubmitted(true)
+    if (!auth.currentUser) {
+      showLoginToast(navigate)
+      return
+    }
 
-    setFormData({
-      name: '',
-      city: '',
-      category: '',
-      address: '',
-      description: '',
-      accessibility: [],
-    })
-  } catch (error) {
-    console.error(
-      'Error submitting suggestion:',
-      error
-    )
+    try {
+      setSubmitting(true)
 
-    alert(
-      'Could not submit your suggestion. Please try again.'
-    )
-  } finally {
-    setSubmitting(false)
+      const suggestionData = {
+        userId:
+          auth.currentUser.uid,
+
+        userName:
+          auth.currentUser.displayName ||
+          auth.currentUser.email ||
+          'AccessHub User',
+
+        userEmail:
+          auth.currentUser.email || '',
+
+        name:
+          formData.name.trim(),
+
+        city:
+          formData.city.trim(),
+
+        category:
+          formData.category,
+
+        address:
+          formData.address.trim(),
+
+        description:
+          formData.description.trim(),
+
+        accessibility:
+          formData.accessibility,
+
+        status: 'pending',
+
+        createdAt:
+          new Date().toISOString()
+      }
+
+      await addDoc(
+        collection(db, 'suggestions'),
+        suggestionData
+      )
+
+      toast.success(
+        'Suggestion submitted successfully! It has been sent to our team for review.',
+        {
+          autoClose: 4000
+        }
+      )
+
+      setSubmitted(true)
+
+      setFormData({
+        name: '',
+        city: '',
+        category: '',
+        address: '',
+        description: '',
+        accessibility: []
+      })
+    } catch (error) {
+      console.error(
+        'Error submitting suggestion:',
+        error
+      )
+
+      toast.error(
+        'Could not submit your suggestion. Please try again.'
+      )
+    } finally {
+      setSubmitting(false)
+    }
   }
-}
 
   return (
     <main className="suggest-page">
       <div className="suggest-container">
-
         <section className="suggest-intro">
           <span className="section-label">
             COMMUNITY CONTRIBUTION
@@ -172,23 +193,26 @@ toast.success(
         </section>
 
         {!auth.currentUser && (
-  <div className="suggest-login-notice">
-    <span>
-      Want to suggest a place? You’ll need to be logged in to submit a suggestion.
-    </span>
+          <aside className="suggest-login-notice">
+            <span>
+              Want to suggest a place? You’ll need
+              to be logged in to submit a suggestion.
+            </span>
 
-    <button
-      type="button"
-      onClick={() => navigate('/login')}
-    >
-      Log In
-    </button>
-  </div>
-)}
+            <button
+              type="button"
+              onClick={() =>
+                navigate('/login')
+              }
+            >
+              Log In
+            </button>
+          </aside>
+        )}
 
         {submitted && (
           <div className="suggest-success">
-            <CheckCircle2 size={22} />
+            <Accessibility size={22} />
 
             <div>
               <strong>
@@ -207,9 +231,7 @@ toast.success(
           className="suggest-form"
           onSubmit={handleSubmit}
         >
-
           <section className="suggest-form-section">
-
             <div className="form-section-heading">
               <Building2 size={22} />
 
@@ -224,7 +246,6 @@ toast.success(
             </div>
 
             <div className="suggest-form-grid">
-
               <div className="suggest-field">
                 <label htmlFor="name">
                   Place name *
@@ -322,18 +343,17 @@ toast.success(
                   />
                 </div>
               </div>
-
             </div>
-
           </section>
 
           <section className="suggest-form-section">
-
             <div className="form-section-heading">
               <Accessibility size={22} />
 
               <div>
-                <h2>Accessibility features</h2>
+                <h2>
+                  Accessibility features
+                </h2>
 
                 <p>
                   Select the features you know are
@@ -343,40 +363,43 @@ toast.success(
             </div>
 
             <div className="suggest-accessibility-grid">
-
-              {accessibilityOptions.map((feature) => (
-                <label
-                  key={feature}
-                  className={`suggest-accessibility-option ${
+              {accessibilityOptions.map(
+                (feature) => {
+                  const selected =
                     formData.accessibility.includes(
                       feature
                     )
-                      ? 'selected'
-                      : ''
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={formData.accessibility.includes(
-                      feature
-                    )}
-                    onChange={() =>
-                      handleAccessibilityChange(
-                        feature
-                      )
-                    }
-                  />
 
-                  <span>{feature}</span>
-                </label>
-              ))}
+                  return (
+                    <label
+                      key={feature}
+                      className={`suggest-accessibility-option ${
+                        selected
+                          ? 'selected'
+                          : ''
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          handleAccessibilityChange(
+                            feature
+                          )
+                        }
+                      />
 
+                      <span>
+                        {feature}
+                      </span>
+                    </label>
+                  )
+                }
+              )}
             </div>
-
           </section>
 
           <section className="suggest-form-section">
-
             <div className="suggest-field">
               <label htmlFor="description">
                 Additional information
@@ -391,7 +414,6 @@ toast.success(
                 placeholder="Share anything useful about the entrance, parking, restrooms, staff support, or other accessibility details..."
               />
             </div>
-
           </section>
 
           <div className="suggest-submit-area">
@@ -400,21 +422,19 @@ toast.success(
               it becomes official place information.
             </p>
 
-           <button
-  type="submit"
-  className="suggest-submit-button"
-  disabled={submitting}
->
-  <Send size={18} />
+            <button
+              type="submit"
+              className="suggest-submit-button"
+              disabled={submitting}
+            >
+              <Send size={18} />
 
-  {submitting
-    ? 'Submitting...'
-    : 'Submit Suggestion'}
-</button>
+              {submitting
+                ? 'Submitting...'
+                : 'Submit Suggestion'}
+            </button>
           </div>
-
         </form>
-
       </div>
     </main>
   )

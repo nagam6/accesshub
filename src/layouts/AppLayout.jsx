@@ -1,21 +1,23 @@
 import { Outlet } from 'react-router-dom'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+
 import AccessibilityPanel from '../components/AccessibilityPanel'
+import Footer from '../components/Footer'
+import Header from '../components/Header'
+
 function AppLayout() {
   return (
     <>
       <div className="site-visual-content">
+        <Header />
 
-      <Header />
+        <main>
+          <Outlet />
+        </main>
 
-      <main>
-        <Outlet />
-      </main>
-
-      <Footer />
+        <Footer />
       </div>
-        <AccessibilityPanel />
+
+      <AccessibilityPanel />
     </>
   )
 }

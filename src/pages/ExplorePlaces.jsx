@@ -1,57 +1,58 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-
-import {
-  collection,
-  getDocs
-} from 'firebase/firestore'
-
-import { db } from '../firebase/firebase'
-
 import {
   Search,
   SlidersHorizontal,
   RotateCcw,
   X,
-  ArrowUpDown
+  ArrowUpDown,
 } from 'lucide-react'
+import {
+  collection,
+  getDocs,
+} from 'firebase/firestore'
 
+import { db } from '../firebase/firebase'
 import PlaceCard from '../components/PlaceCard'
+
 import './ExplorePlaces.css'
 
 function ExplorePlaces() {
   const [searchParams] = useSearchParams()
+
+  const initialSearch =
+    searchParams.get('search') || ''
+
+  const initialCity =
+    searchParams.get('city') || ''
+
   const [places, setPlaces] = useState([])
-  const [loadingPlaces, setLoadingPlaces] = useState(true)
-  const [placesError, setPlacesError] = useState('')
+  const [loadingPlaces, setLoadingPlaces] =
+    useState(true)
+  const [placesError, setPlacesError] =
+    useState('')
 
-const initialSearch =
-  searchParams.get('search') || ''
+  const [searchInput, setSearchInput] =
+    useState(initialSearch)
+  const [searchTerm, setSearchTerm] =
+    useState(initialSearch)
 
-const initialCity =
-  searchParams.get('city') || ''
+  const [selectedCity, setSelectedCity] =
+    useState(initialCity)
+  const [
+    selectedCategory,
+    setSelectedCategory,
+  ] = useState('')
+  const [
+    selectedAccessibility,
+    setSelectedAccessibility,
+  ] = useState('')
 
-const [searchInput, setSearchInput] =
-  useState(initialSearch)
-
-const [searchTerm, setSearchTerm] =
-  useState(initialSearch)
-
-const [selectedCity, setSelectedCity] =
-  useState(initialCity)
-
-  const [showFilters, setShowFilters] = useState(false)
-
-  
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedAccessibility, setSelectedAccessibility] = useState('')
-
+  const [showFilters, setShowFilters] =
+    useState(false)
   const [sortBy, setSortBy] = useState('')
-  const [onlyVerified, setOnlyVerified] = useState(false)
-
-  /* =========================
-     LOAD PLACES FROM FIRESTORE
-  ========================= */
+  const [onlyVerified, setOnlyVerified] =
+    useState(false)
 
   useEffect(() => {
     async function loadPlaces() {
@@ -62,14 +63,15 @@ const [selectedCity, setSelectedCity] =
         const snapshot = await getDocs(
           collection(db, 'places')
         )
-const firebasePlaces = snapshot.docs.map(
-  (document) => ({
-    ...document.data(),
-    id: document.id,
-  })
-)
+
+        const firebasePlaces =
+          snapshot.docs.map((document) => ({
+            ...document.data(),
+            id: document.id,
+          }))
+
         setPlaces(firebasePlaces)
-      } catch (error) {s
+      } catch (error) {
         console.error(
           'Error loading places:',
           error
@@ -85,10 +87,6 @@ const firebasePlaces = snapshot.docs.map(
 
     loadPlaces()
   }, [])
-
-  /* =========================
-     FILTER OPTIONS
-  ========================= */
 
   const cities = [
     ...new Set(
@@ -119,10 +117,6 @@ const firebasePlaces = snapshot.docs.map(
     ),
   ]
 
-  /* =========================
-     SEARCH
-  ========================= */
-
   function handleSearch() {
     setSearchTerm(searchInput.trim())
   }
@@ -143,64 +137,58 @@ const firebasePlaces = snapshot.docs.map(
     setSortBy('')
   }
 
-  /* =========================
-     FILTER PLACES
-  ========================= */
+  const filteredPlaces = places.filter(
+    (place) => {
+      const searchValue =
+        searchTerm.toLowerCase()
 
-  const filteredPlaces = places.filter((place) => {
-    const searchValue =
-      searchTerm.toLowerCase()
+      const name =
+        place.name?.toLowerCase() || ''
 
-    const name =
-      place.name?.toLowerCase() || ''
+      const city =
+        place.city?.toLowerCase() || ''
 
-    const city =
-      place.city?.toLowerCase() || ''
+      const category =
+        place.category?.toLowerCase() || ''
 
-    const category =
-      place.category?.toLowerCase() || ''
+      const address =
+        place.address?.toLowerCase() || ''
 
-    const address =
-      place.address?.toLowerCase() || ''
+      const matchesSearch =
+        searchValue === '' ||
+        name.includes(searchValue) ||
+        city.includes(searchValue) ||
+        category.includes(searchValue) ||
+        address.includes(searchValue)
 
-    const matchesSearch =
-      searchValue === '' ||
-      name.includes(searchValue) ||
-      city.includes(searchValue) ||
-      category.includes(searchValue) ||
-      address.includes(searchValue)
+      const matchesCity =
+        selectedCity === '' ||
+        place.city === selectedCity
 
-    const matchesCity =
-      selectedCity === '' ||
-      place.city === selectedCity
+      const matchesCategory =
+        selectedCategory === '' ||
+        place.category === selectedCategory
 
-    const matchesCategory =
-      selectedCategory === '' ||
-      place.category === selectedCategory
-
-    const matchesAccessibility =
-      selectedAccessibility === '' ||
-      Object.values(
-        place.accessibility || {}
-      )
-        .flat()
-        .some(
-          (feature) =>
-            feature.name ===
-            selectedAccessibility
+      const matchesAccessibility =
+        selectedAccessibility === '' ||
+        Object.values(
+          place.accessibility || {}
         )
+          .flat()
+          .some(
+            (feature) =>
+              feature.name ===
+              selectedAccessibility
+          )
 
-    return (
-      matchesSearch &&
-      matchesCity &&
-      matchesCategory &&
-      matchesAccessibility
-    )
-  })
-
-  /* =========================
-     SORT + VERIFIED
-  ========================= */
+      return (
+        matchesSearch &&
+        matchesCity &&
+        matchesCategory &&
+        matchesAccessibility
+      )
+    }
+  )
 
   const sortedPlaces = [...filteredPlaces]
     .filter((place) => {
@@ -212,15 +200,18 @@ const firebasePlaces = snapshot.docs.map(
     })
     .sort((a, b) => {
       if (sortBy === 'mostReviews') {
-        return (b.reviews || 0) - (a.reviews || 0)
+        return (
+          (b.reviews || 0) -
+          (a.reviews || 0)
+        )
       }
 
-if (sortBy === 'highestRated') {
-  return (
-    (b.ratingStars || 0) -
-    (a.ratingStars || 0)
-  )
-}
+      if (sortBy === 'highestRated') {
+        return (
+          (b.ratingStars || 0) -
+          (a.ratingStars || 0)
+        )
+      }
 
       if (sortBy === 'recentlyUpdated') {
         return (
@@ -235,9 +226,6 @@ if (sortBy === 'highestRated') {
   return (
     <section className="explore-page">
       <div className="explore-container">
-
-        {/* PAGE HEADING */}
-
         <div className="explore-heading">
           <span className="section-label">
             EXPLORE PLACES
@@ -253,10 +241,7 @@ if (sortBy === 'highestRated') {
           </p>
         </div>
 
-        {/* SEARCH */}
-
         <div className="explore-toolbar">
-
           <div className="explore-search">
             <Search size={20} />
 
@@ -265,7 +250,9 @@ if (sortBy === 'highestRated') {
               placeholder="Search by place, city, category, or address"
               value={searchInput}
               onChange={(event) =>
-                setSearchInput(event.target.value)
+                setSearchInput(
+                  event.target.value
+                )
               }
               onKeyDown={handleKeyDown}
             />
@@ -301,14 +288,10 @@ if (sortBy === 'highestRated') {
 
             Filters
           </button>
-
         </div>
-
-        {/* FILTERS */}
 
         {showFilters && (
           <div className="filters-panel">
-
             <div className="filter-group">
               <label htmlFor="city-filter">
                 City
@@ -356,16 +339,14 @@ if (sortBy === 'highestRated') {
                   All categories
                 </option>
 
-                {categories.map(
-                  (category) => (
-                    <option
-                      key={category}
-                      value={category}
-                    >
-                      {category}
-                    </option>
-                  )
-                )}
+                {categories.map((category) => (
+                  <option
+                    key={category}
+                    value={category}
+                  >
+                    {category}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -408,11 +389,8 @@ if (sortBy === 'highestRated') {
               <RotateCcw size={17} />
               Reset
             </button>
-
           </div>
         )}
-
-        {/* LOADING */}
 
         {loadingPlaces && (
           <div className="explore-status-message">
@@ -420,32 +398,25 @@ if (sortBy === 'highestRated') {
           </div>
         )}
 
-        {/* ERROR */}
-
         {placesError && (
           <div className="explore-status-message error">
             {placesError}
           </div>
         )}
 
-        {/* RESULTS */}
-
         {!loadingPlaces && !placesError && (
           <>
             <div className="results-header">
-
               <p className="results-count">
                 <strong>
                   {sortedPlaces.length}
                 </strong>{' '}
-
                 {sortedPlaces.length === 1
                   ? 'place found'
                   : 'places found'}
               </p>
 
               <div className="results-controls">
-
                 <div className="sort-control">
                   <label htmlFor="sort-select">
                     <ArrowUpDown size={17} />
@@ -492,34 +463,27 @@ if (sortBy === 'highestRated') {
 
                   Only verified
                 </label>
-
               </div>
-
             </div>
-
-            {/* CARDS */}
 
             {sortedPlaces.length > 0 ? (
               <div className="places-grid">
-
                 {sortedPlaces.map((place) => (
                   <PlaceCard
                     key={place.id}
                     place={place}
                   />
                 ))}
-
               </div>
             ) : (
               <div className="no-results">
-
                 <Search size={34} />
 
                 <h2>No places found</h2>
 
                 <p>
-                  Try changing your search
-                  or filters.
+                  Try changing your search or
+                  filters.
                 </p>
 
                 <button
@@ -528,12 +492,10 @@ if (sortBy === 'highestRated') {
                 >
                   Clear search and filters
                 </button>
-
               </div>
             )}
           </>
         )}
-
       </div>
     </section>
   )

@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-
 import { sendPasswordResetEmail } from 'firebase/auth'
-import { auth } from '../firebase/firebase'
-
 import {
-  Mail,
   ArrowLeft,
-  KeyRound
+  KeyRound,
+  Mail
 } from 'lucide-react'
+
+import { auth } from '../firebase/firebase'
 
 import './ForgotPassword.css'
 
@@ -25,7 +24,9 @@ function ForgotPassword() {
     setSuccess(false)
 
     if (!email.trim()) {
-      setMessage('Please enter your email address.')
+      setMessage(
+        'Please enter your email address.'
+      )
       return
     }
 
@@ -64,7 +65,6 @@ function ForgotPassword() {
   return (
     <main className="forgot-page">
       <div className="forgot-container">
-
         <div className="forgot-icon">
           <KeyRound size={28} />
         </div>
@@ -72,8 +72,8 @@ function ForgotPassword() {
         <h1>Forgot Password?</h1>
 
         <p className="forgot-description">
-          Enter your email address and we’ll send you
-          a link to reset your password.
+          Enter your email address and we’ll
+          send you a link to reset your password.
         </p>
 
         <form
@@ -128,7 +128,6 @@ function ForgotPassword() {
           <ArrowLeft size={16} />
           Back to Login
         </Link>
-
       </div>
     </main>
   )

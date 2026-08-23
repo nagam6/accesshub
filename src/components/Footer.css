@@ -7,25 +7,19 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 65px 32px 45px;
-
   display: grid;
   grid-template-columns: 1.6fr repeat(3, 1fr);
   gap: 50px;
-
   align-items: flex-start;
 }
 
-/* =========================
-   BRAND
-========================= */
-
+/* BRAND */
 .footer-brand {
   min-width: 0;
 }
 
 .footer-logo-link {
   display: inline-block;
-
   color: inherit;
   text-decoration: none;
 }
@@ -34,59 +28,43 @@
   display: flex;
   align-items: center;
   gap: 12px;
-
   margin-bottom: 18px;
 }
 
 .footer-logo-icon {
   width: 46px;
   height: 46px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   flex-shrink: 0;
-
   border-radius: 14px;
-
   background-color: #08777c;
   color: #ffffff;
 }
 
 .footer-brand h3 {
   margin: 0;
-
   color: #ffffff;
-
   font-size: 1.25rem;
 }
 
 .footer-brand span {
   display: block;
-
   margin-top: 3px;
-
   color: #9fb8bd;
-
   font-size: 0.68rem;
   letter-spacing: 0.08em;
 }
 
-.footer-brand > p {
+.footer-brand>p {
   max-width: 390px;
-
   margin: 0;
-
   color: #b9c9cc;
-
   line-height: 1.7;
 }
 
-/* =========================
-   FOOTER COLUMNS
-========================= */
-
+/* COLUMNS */
 .footer-column {
   display: flex;
   flex-direction: column;
@@ -96,29 +74,22 @@
 
 .footer-column h4 {
   margin: 0 0 8px;
-
   color: #ffffff;
-
   font-size: 1rem;
 }
 
-/* Only actual links in columns */
 .footer-column a {
   color: #b9c9cc;
-
-  text-decoration: none;
-
   font-size: 0.94rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .footer-column a:hover {
   color: #ffffff;
 }
 
-/* =========================
-   CONTACT
-========================= */
-
+/* CONTACT */
 .footer-contact {
   gap: 12px;
 }
@@ -127,11 +98,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
   margin: 0;
-
   color: #b9c9cc;
-
   font-size: 0.94rem;
   line-height: 1.4;
 }
@@ -139,9 +107,7 @@
 .footer-contact-line svg {
   width: 17px;
   height: 17px;
-
   flex: 0 0 17px;
-
   color: #b9c9cc;
 }
 
@@ -149,44 +115,47 @@
   margin: 0;
 }
 
-/* =========================
-   FOOTER BOTTOM
-========================= */
+.footer-contact-line:hover,
+.footer-contact-line:hover svg {
+  color: #ffffff;
+}
 
+/* BOTTOM */
 .footer-bottom {
   padding: 20px 32px;
-
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-
   text-align: center;
 }
 
 .footer-bottom p {
   margin: 0;
-
   color: #91a9ae;
-
   font-size: 0.88rem;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
+/* Tablet */
 @media (max-width: 900px) {
   .footer-container {
     grid-template-columns: repeat(2, 1fr);
+    gap: 36px;
+    padding: 55px 24px 40px;
   }
 }
 
+/* Mobile */
 @media (max-width: 600px) {
   .footer-container {
     grid-template-columns: 1fr;
-
+    gap: 32px;
     padding: 50px 20px 35px;
   }
-
+  .footer-brand > p {
+    max-width: 100%;
+  }
   .footer-bottom {
     padding: 18px 20px;
+  }
+  .footer-bottom p {
+    font-size: 0.82rem;
   }
 }

@@ -1,41 +1,37 @@
 import { Link, NavLink } from 'react-router-dom'
 import {
   Accessibility,
-  House,
-  Compass,
-  PlusCircle,
   CircleHelp,
+  Compass,
   Heart,
+  House,
+  PlusCircle,
+  Shield,
   UserRound,
-   Shield
 } from 'lucide-react'
+
 import { useAuth } from '../context/AuthContext'
+
 import './Header.css'
 
 function Header() {
-  const {
-  user,userRole,
-  authLoading
-} = useAuth()
+  const { user, userRole, authLoading } = useAuth()
+
   return (
     <header className="site-header">
       <div className="header-container">
-
-        {/* Logo */}
         <NavLink to="/" className="brand">
-          <div className="brand-icon">
+          <span className="brand-icon">
             <Accessibility size={25} strokeWidth={2.2} />
-          </div>
+          </span>
 
-          <div className="brand-text">
+          <span className="brand-text">
             <span className="brand-name">AccessHub</span>
             <span className="brand-tagline">CLEAR PATH</span>
-          </div>
+          </span>
         </NavLink>
 
-        {/* Navigation */}
         <nav className="main-nav" aria-label="Main navigation">
-
           <NavLink
             to="/"
             end
@@ -67,15 +63,15 @@ function Header() {
             <span>Suggest a Place</span>
           </NavLink>
 
-     <NavLink
-  to="/about"
-  className={({ isActive }) =>
-    isActive ? 'nav-link active' : 'nav-link'
-  }
->
-  <CircleHelp size={19} />
-  <span>About</span>
-</NavLink>
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              isActive ? 'nav-link active' : 'nav-link'
+            }
+          >
+            <CircleHelp size={19} />
+            <span>About</span>
+          </NavLink>
 
           <NavLink
             to="/favorites"
@@ -86,39 +82,33 @@ function Header() {
             <Heart size={19} />
             <span>Favorites</span>
           </NavLink>
-
         </nav>
 
-        {/* Login */}
-        {!authLoading && (
-  <>
-{user && userRole === 'admin' ? (
-  <Link
-    to="/admin"
-    className="header-account-link"
-  >
-    <Shield size={18} />
-    Admin Dashboard
-  </Link>
-) : user ? (
-  <Link
-    to="/profile"
-    className="header-account-link"
-  >
-    <UserRound size={18} />
-    My Account
-  </Link>
-) : (
-  <Link
-    to="/login"
-    className="header-login-link"
-  >
-    Log In
-  </Link>
-)}
-  </>
-)}
-
+        {!authLoading &&
+          (user && userRole === 'admin' ? (
+            <Link
+              to="/admin"
+              className="header-account-link"
+            >
+              <Shield size={18} />
+              Admin Dashboard
+            </Link>
+          ) : user ? (
+            <Link
+              to="/profile"
+              className="header-account-link"
+            >
+              <UserRound size={18} />
+              My Account
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="header-login-link"
+            >
+              Log In
+            </Link>
+          ))}
       </div>
     </header>
   )
