@@ -181,43 +181,23 @@ function AdminSuggestions() {
       </span>
     )
   }
-  async function handleApprove(suggestion) {
-      console.log('APPROVE CLICKED:', suggestion)
 
+async function handleApprove(suggestion) {
   try {
-    // Get the existing places so we can create the next numeric ID
-    const placesSnapshot = await getDocs(
+    const newPlaceRef = doc(
       collection(db, 'places')
     )
 
-    const existingIds = placesSnapshot.docs
-      .map((placeDocument) =>
-        Number(placeDocument.id)
-      )
-      .filter((placeId) =>
-        Number.isFinite(placeId)
-      )
-
-    const nextPlaceId =
-      existingIds.length > 0
-        ? Math.max(...existingIds) + 1
-        : 1
-console.log('NEXT PLACE ID:', nextPlaceId)
     const placeData = {
-      id: nextPlaceId,
-
       name: suggestion.name || '',
       category: suggestion.category || '',
       city: suggestion.city || '',
       address: suggestion.address || '',
+      description: suggestion.description || '',
 
-      description:
-        suggestion.description || '',
-
-      rating: 0,
+      ratingStars: 0,
       reviews: 0,
 
-      // Approved submission != verified accessibility information
       verified: false,
 
       updatedAt:
@@ -254,17 +234,11 @@ console.log('NEXT PLACE ID:', nextPlaceId)
 
     const batch = writeBatch(db)
 
-    // Create the actual place
     batch.set(
-      doc(
-        db,
-        'places',
-        String(nextPlaceId)
-      ),
+      newPlaceRef,
       placeData
     )
 
-    // Update the suggestion
     batch.update(
       doc(
         db,
@@ -273,16 +247,17 @@ console.log('NEXT PLACE ID:', nextPlaceId)
       ),
       {
         status: 'approved',
+
         reviewedAt:
           new Date().toISOString(),
 
         approvedPlaceId:
-          nextPlaceId,
+          newPlaceRef.id,
       }
     )
-console.log('PLACE DATA TO CREATE:', placeData)
+
     await batch.commit()
-console.log('BATCH COMMITTED SUCCESSFULLY')
+
     setSuggestions((current) =>
       current.map((item) =>
         item.firestoreId ===
@@ -291,7 +266,7 @@ console.log('BATCH COMMITTED SUCCESSFULLY')
               ...item,
               status: 'approved',
               approvedPlaceId:
-                nextPlaceId,
+                newPlaceRef.id,
             }
           : item
       )
@@ -310,7 +285,7 @@ console.log('BATCH COMMITTED SUCCESSFULLY')
       'Could not approve this suggestion.'
     )
   }
-}
+}  
 
   return (
     <main className="admin-suggestions-page">

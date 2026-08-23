@@ -18,7 +18,7 @@ function PlaceCard({ place }) {
   const { toggleFavorite, isFavorite } = useFavorites()
   const favorite = isFavorite(place.id)
 
-    const accessibilityCount = Object.values(place.accessibility)
+    const accessibilityCount = Object.values(place.accessibility || {})
     .flat()
     .length
 

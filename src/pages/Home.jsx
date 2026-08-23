@@ -110,15 +110,10 @@ useEffect(() => {
       )
 
 const placesData = snapshot.docs.map(
-  (document) => {
-    const placeData = document.data()
-
-    return {
-      ...placeData,
-      firestoreId: document.id,
-      id: placeData.id ?? document.id,
-    }
-  }
+  (document) => ({
+    ...document.data(),
+    id: document.id,
+  })
 )
 
       setPlaces(placesData)
@@ -411,7 +406,7 @@ function handleHeroListen() {
     .slice(0, 3)
     .map((place) => (
       <PlaceCard
-        key={place.firestoreId || place.id}
+        key={place.id}
         place={place}
       />
     ))}

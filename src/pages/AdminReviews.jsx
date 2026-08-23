@@ -5,7 +5,10 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs
+  getDocs,
+  query,
+  runTransaction,
+  where,
 } from 'firebase/firestore'
 
 import { db } from '../firebase/firebase'
@@ -56,25 +59,14 @@ function AdminReviews() {
 
         const placesLookup = {}
 
-        placesSnapshot.docs.forEach(
-          (placeDocument) => {
-            const placeData =
-              placeDocument.data()
-
-            const placeId =
-              placeData.id ??
-              placeDocument.id
-
-            placesLookup[
-              String(placeId)
-            ] = {
-              firestoreId:
-                placeDocument.id,
-
-              ...placeData,
-            }
-          }
-        )
+      placesSnapshot.docs.forEach(
+  (placeDocument) => {
+    placesLookup[placeDocument.id] = {
+      ...placeDocument.data(),
+      id: placeDocument.id,
+    }
+  }
+)
 
         setReviews(reviewsData)
         setPlacesMap(placesLookup)
@@ -91,45 +83,107 @@ function AdminReviews() {
     loadAdminReviews()
   }, [])
 
-  async function handleDeleteReview(review) {
-    const confirmed = window.confirm(
-      `Delete this review by ${
-        review.userName || 'this user'
-      }?`
-    )
+async function handleDeleteReview(review) {
+  const confirmed = window.confirm(
+    `Delete this review by ${
+      review.userName || 'this user'
+    }?`
+  )
 
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      await deleteDoc(
-        doc(
-          db,
-          'reviews',
-          review.firestoreId
-        )
-      )
-
-      setReviews((current) =>
-        current.filter(
-          (item) =>
-            item.firestoreId !==
-            review.firestoreId
-        )
-      )
-    } catch (error) {
-      console.error(
-        'Error deleting review:',
-        error
-      )
-
-      alert(
-        'Could not delete the review.'
-      )
-    }
+  if (!confirmed) {
+    return
   }
 
+  try {
+    const reviewRef = doc(
+      db,
+      'reviews',
+      review.firestoreId
+    )
+
+    const placeRef = doc(
+      db,
+      'places',
+      String(review.placeId)
+    )
+
+    await deleteDoc(reviewRef)
+
+    const remainingReviewsQuery = query(
+      collection(db, 'reviews'),
+      where(
+        'placeId',
+        '==',
+        String(review.placeId)
+      )
+    )
+
+    const remainingSnapshot =
+      await getDocs(remainingReviewsQuery)
+
+    const remainingReviews =
+      remainingSnapshot.docs.map(
+        (document) => document.data()
+      )
+
+    const reviewCount =
+      remainingReviews.length
+
+    const ratingStars =
+      reviewCount === 0
+        ? 0
+        : Number(
+            (
+              remainingReviews.reduce(
+                (sum, item) =>
+                  sum +
+                  Number(
+                    item.ratingStars || 0
+                  ),
+                0
+              ) /
+              reviewCount
+            ).toFixed(1)
+          )
+
+    await runTransaction(
+      db,
+      async (transaction) => {
+        const placeSnapshot =
+          await transaction.get(placeRef)
+
+        if (!placeSnapshot.exists()) {
+          return
+        }
+
+        transaction.update(
+          placeRef,
+          {
+            reviews: reviewCount,
+            ratingStars,
+          }
+        )
+      }
+    )
+
+    setReviews((current) =>
+      current.filter(
+        (item) =>
+          item.firestoreId !==
+          review.firestoreId
+      )
+    )
+  } catch (error) {
+    console.error(
+      'Error deleting review:',
+      error
+    )
+
+    alert(
+      'Could not delete the review.'
+    )
+  }
+}
   return (
     <main className="admin-reviews-page">
       <div className="admin-reviews-container">

@@ -30,12 +30,9 @@ export function FavoritesProvider({ children }) {
   const [loadingFavorites, setLoadingFavorites] =
     useState(true)
 
-  function getPlaceId(place) {
-    return String(
-      place.firestoreId ??
-      place.id
-    )
-  }
+function getPlaceId(place) {
+  return String(place.id)
+}
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
@@ -80,10 +77,8 @@ export function FavoritesProvider({ children }) {
 
             if (placeSnapshot.exists()) {
               loadedFavorites.push({
-                firestoreId:
-                  placeSnapshot.id,
-
                 ...placeSnapshot.data(),
+                id: placeSnapshot.id,
               })
             }
           }

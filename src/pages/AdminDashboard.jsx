@@ -49,13 +49,13 @@ const [loadingDashboard, setLoadingDashboard] =
         getDocs(collection(db, 'reports')),
       ])
 
-      const placesData =
-        placesSnapshot.docs.map(
-          (placeDocument) => ({
-            firestoreId: placeDocument.id,
-            ...placeDocument.data(),
-          })
-        )
+    const placesData =
+  placesSnapshot.docs.map(
+    (placeDocument) => ({
+      ...placeDocument.data(),
+      id: placeDocument.id,
+    })
+  )
 
       const reviewsData =
         reviewsSnapshot.docs.map(
@@ -318,15 +318,15 @@ const verifiedPlaces = places.filter(
 
               <tbody>
                 {places.slice(0, 5).map((place) => (
-<tr key={place.firestoreId}>                    <td>
-                      <strong>{place.name}</strong>
-                    </td>
+                  <tr key={place.id}>   
+
+                    <td><strong>{place.name}</strong></td>
 
                     <td>{place.category}</td>
 
                     <td>{place.city}</td>
 
-                    <td>{place.rating}</td>
+                    <td>{place.ratingStars ?? '—'}</td>
 
                     <td>
                       <span

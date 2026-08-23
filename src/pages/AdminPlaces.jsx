@@ -39,8 +39,8 @@ useEffect(() => {
       )
 
  const firestorePlaces = querySnapshot.docs.map((document) => ({
-  firestoreId: document.id,
   ...document.data(),
+  id: document.id,
 }))
 
       setFirebasePlaces(firestorePlaces)
@@ -94,8 +94,7 @@ async function handleDeletePlace(place) {
   }
 
   try {
-    const placeId =
-      place.firestoreId || String(place.id)
+    const placeId = place.id
 
     const placeRef = doc(
       db,
@@ -107,9 +106,7 @@ async function handleDeletePlace(place) {
 
     setFirebasePlaces((current) =>
       current.filter(
-        (item) =>
-          (item.firestoreId || String(item.id)) !==
-          placeId
+        (item) => item.id !== placeId
       )
     )
 
@@ -130,8 +127,7 @@ async function handleDeletePlace(place) {
 
 async function handleToggleVerified(place) {
   try {
-    const placeId =
-      place.firestoreId || String(place.id)
+   const placeId = place.id
 
     const placeRef = doc(
       db,
@@ -148,8 +144,7 @@ async function handleToggleVerified(place) {
 
     setFirebasePlaces((current) =>
       current.map((item) =>
-        (item.firestoreId || String(item.id)) ===
-        placeId
+          item.id === placeId
           ? {
               ...item,
               verified: newVerified,
@@ -260,7 +255,7 @@ async function handleToggleVerified(place) {
 
                 <tbody>
                   {filteredPlaces.map((place) => (
-                    <tr key={place.firestoreId || place.id}>
+                    <tr key={place.id}>
 
                       <td>
                         <div className="admin-place-info">

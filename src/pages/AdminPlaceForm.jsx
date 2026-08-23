@@ -226,7 +226,7 @@ const placeData = {
         {
           ...placeData,
 
-          rating: 0,
+          ratingStars: 0,
           reviews: 0,
 
           createdAt:

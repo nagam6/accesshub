@@ -63,18 +63,13 @@ const [selectedCity, setSelectedCity] =
           collection(db, 'places')
         )
 const firebasePlaces = snapshot.docs.map(
-  (document) => {
-    const placeData = document.data()
-
-    return {
-      ...placeData,
-      firestoreId: document.id,
-      id: placeData.id ?? document.id,
-    }
-  }
+  (document) => ({
+    ...document.data(),
+    id: document.id,
+  })
 )
         setPlaces(firebasePlaces)
-      } catch (error) {
+      } catch (error) {s
         console.error(
           'Error loading places:',
           error
@@ -509,10 +504,7 @@ if (sortBy === 'highestRated') {
 
                 {sortedPlaces.map((place) => (
                   <PlaceCard
-                    key={
-                      place.firestoreId ||
-                      place.id
-                    }
+                    key={place.id}
                     place={place}
                   />
                 ))}

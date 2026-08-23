@@ -5,7 +5,7 @@ import {
   getDoc,
   collection,
   getDocs,
-  addDoc,
+  
   query,
   where,
   runTransaction
@@ -91,8 +91,8 @@ function PlaceDetails() {
 const placeData = placeSnapshot.data()
 
 setPlace({
-  firestoreId: placeSnapshot.id,
   ...placeData,
+  id: placeSnapshot.id,
 })
       } catch (error) {
         console.error(
@@ -122,8 +122,7 @@ useEffect(() => {
     try {
       const reviewsQuery = query(
         collection(db, 'reviews'),
-        where('placeId', '==', Number(place.id))
-      )
+where('placeId', '==', place.id)      )
 
       const snapshot = await getDocs(reviewsQuery)
 
@@ -325,8 +324,8 @@ async function handleAddReview(event) {
   try {
     const ratingValue = Number(newRating)
 
-    const reviewData = {
-      placeId: Number(place.id),
+  const reviewData = {
+  placeId: place.id,
 
       userId: auth.currentUser.uid,
 
@@ -346,11 +345,11 @@ async function handleAddReview(event) {
       helpfulUsers: [],
     }
 
-    const placeRef = doc(
-      db,
-      'places',
-      String(place.firestoreId || place.id)
-    )
+  const placeRef = doc(
+  db,
+  'places',
+  place.id
+)
 
     const reviewRef = doc(
       collection(db, 'reviews')
@@ -464,8 +463,8 @@ async function handleReportInformation(event) {
 
   try {
     const reportData = {
-      placeId: Number(place.id),
-      placeName: place.name,
+  placeId: place.id,
+  placeName: place.name,
 
       userId: auth.currentUser.uid,
 
