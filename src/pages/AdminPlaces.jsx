@@ -88,45 +88,80 @@ function AdminPlaces() {
     })
   }, [searchTerm, firebasePlaces])
 
-  async function handleDeletePlace(place) {
-    const confirmed = window.confirm(
-      `Delete ${place.name}?`
-    )
+function handleDeletePlace(place) {
+  toast(
+    ({ closeToast }) => (
+      <div className="admin-delete-toast">
+        <div>
+          <strong>Delete place?</strong>
 
-    if (!confirmed) {
-      return
+          <p>
+            Are you sure you want to delete
+            {` ${place.name}`}?
+          </p>
+        </div>
+
+        <div className="admin-delete-toast-actions">
+          <button
+            type="button"
+            onClick={closeToast}
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            className="delete"
+            onClick={async () => {
+              closeToast()
+
+              try {
+                const placeId = place.id
+
+                await deleteDoc(
+                  doc(
+                    db,
+                    'places',
+                    placeId
+                  )
+                )
+
+                setFirebasePlaces(
+                  (current) =>
+                    current.filter(
+                      (item) =>
+                        item.id !== placeId
+                    )
+                )
+
+                toast.success(
+                  `${place.name} was deleted successfully.`
+                )
+              } catch (error) {
+                console.error(
+                  'Error deleting place:',
+                  error
+                )
+
+                toast.error(
+                  'Could not delete the place. Please try again.'
+                )
+              }
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ),
+    {
+      toastId: `delete-place-${place.id}`,
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false
     }
-
-    try {
-      await deleteDoc(
-        doc(
-          db,
-          'places',
-          place.id
-        )
-      )
-
-      setFirebasePlaces((current) =>
-        current.filter(
-          (item) =>
-            item.id !== place.id
-        )
-      )
-
-      toast.success(
-        `${place.name} was deleted successfully.`
-      )
-    } catch (error) {
-      console.error(
-        'Error deleting place:',
-        error
-      )
-
-      toast.error(
-        'Could not delete the place. Please try again.'
-      )
-    }
-  }
+  )
+}
 
   async function handleToggleVerified(place) {
     const newVerified = !place.verified
@@ -336,8 +371,6 @@ function AdminPlaces() {
                           <div className="admin-place-actions">
                             <Link
                               to={`/places/${place.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
                               className="admin-icon-button"
                               aria-label={`View ${place.name}`}
                               title="View place"

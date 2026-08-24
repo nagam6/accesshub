@@ -297,6 +297,44 @@
   color: #c44747;
 }
 
+.admin-delete-toast {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-delete-toast strong {
+  color: #173843;
+}
+
+.admin-delete-toast p {
+  margin: 5px 0 0;
+  color: #667b80;
+  font-size: 0.9rem;
+}
+
+.admin-delete-toast-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-delete-toast-actions button {
+  padding: 8px 13px;
+  border: 1px solid #dce5e5;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #526b71;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-delete-toast-actions .delete {
+  border-color: #df8d8d;
+  background-color: #fff3f3;
+  color: #c44747;
+}
+
 /* Empty state */
 
 .admin-places-empty {
