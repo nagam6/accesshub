@@ -277,6 +277,20 @@ function PlaceDetails() {
   const visibleReviews = showAllReviews
     ? localReviews
     : localReviews.slice(0, 2)
+  
+  const reviewsCount = localReviews.length
+
+const averageRating =
+  reviewsCount > 0
+    ? (
+        localReviews.reduce(
+          (total, review) =>
+            total +
+            Number(review.ratingStars || 0),
+          0
+        ) / reviewsCount
+      ).toFixed(1)
+    : '0.0'
 
   const accessibilityGroups = [
     {
@@ -667,11 +681,11 @@ function PlaceDetails() {
               />
 
               <strong>
-                {place.ratingStars ?? 0}
+                {averageRating}
               </strong>
 
               <span>
-                ({place.reviews ?? 0}{' '}
+                ({reviewsCount}
                 reviews)
               </span>
             </div>

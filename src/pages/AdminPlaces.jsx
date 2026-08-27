@@ -28,6 +28,7 @@ function AdminPlaces() {
   const [searchTerm, setSearchTerm] = useState('')
   const [firebasePlaces, setFirebasePlaces] = useState([])
   const [loading, setLoading] = useState(true)
+  const [reviews, setReviews] = useState([])
 
   useEffect(() => {
     async function fetchPlaces() {
@@ -45,6 +46,18 @@ function AdminPlaces() {
           )
 
         setFirebasePlaces(firestorePlaces)
+
+        const reviewsSnapshot = await getDocs(
+          collection(db, 'reviews')
+        )
+
+        const reviewsData =
+          reviewsSnapshot.docs.map(
+            (reviewDocument) =>
+              reviewDocument.data()
+          )
+
+        setReviews(reviewsData)
       } catch (error) {
         console.error(
           'Error loading places:',
@@ -88,80 +101,102 @@ function AdminPlaces() {
     })
   }, [searchTerm, firebasePlaces])
 
-function handleDeletePlace(place) {
-  toast(
-    ({ closeToast }) => (
-      <div className="admin-delete-toast">
-        <div>
-          <strong>Delete place?</strong>
-
-          <p>
-            Are you sure you want to delete
-            {` ${place.name}`}?
-          </p>
-        </div>
-
-        <div className="admin-delete-toast-actions">
-          <button
-            type="button"
-            onClick={closeToast}
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            className="delete"
-            onClick={async () => {
-              closeToast()
-
-              try {
-                const placeId = place.id
-
-                await deleteDoc(
-                  doc(
-                    db,
-                    'places',
-                    placeId
-                  )
-                )
-
-                setFirebasePlaces(
-                  (current) =>
-                    current.filter(
-                      (item) =>
-                        item.id !== placeId
-                    )
-                )
-
-                toast.success(
-                  `${place.name} was deleted successfully.`
-                )
-              } catch (error) {
-                console.error(
-                  'Error deleting place:',
-                  error
-                )
-
-                toast.error(
-                  'Could not delete the place. Please try again.'
-                )
-              }
-            }}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    ),
-    {
-      toastId: `delete-place-${place.id}`,
-      autoClose: false,
-      closeOnClick: false,
-      draggable: false
-    }
+  function getPlaceRating(placeId) {
+  const placeReviews = reviews.filter(
+    (review) =>
+      String(review.placeId) ===
+      String(placeId)
   )
+
+  if (placeReviews.length === 0) {
+    return '0.0'
+  }
+
+  const total = placeReviews.reduce(
+    (sum, review) =>
+      sum + Number(review.ratingStars || 0),
+    0
+  )
+
+  return (
+    total / placeReviews.length
+  ).toFixed(1)
 }
+
+  function handleDeletePlace(place) {
+    toast(
+      ({ closeToast }) => (
+        <div className="admin-delete-toast">
+          <div>
+            <strong>Delete place?</strong>
+
+            <p>
+              Are you sure you want to delete
+              {` ${place.name}`}?
+            </p>
+          </div>
+
+          <div className="admin-delete-toast-actions">
+            <button
+              type="button"
+              onClick={closeToast}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              className="delete"
+              onClick={async () => {
+                closeToast()
+
+                try {
+                  const placeId = place.id
+
+                  await deleteDoc(
+                    doc(
+                      db,
+                      'places',
+                      placeId
+                    )
+                  )
+
+                  setFirebasePlaces(
+                    (current) =>
+                      current.filter(
+                        (item) =>
+                          item.id !== placeId
+                      )
+                  )
+
+                  toast.success(
+                    `${place.name} was deleted successfully.`
+                  )
+                } catch (error) {
+                  console.error(
+                    'Error deleting place:',
+                    error
+                  )
+
+                  toast.error(
+                    'Could not delete the place. Please try again.'
+                  )
+                }
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        toastId: `delete-place-${place.id}`,
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false
+      }
+    )
+  }
 
   async function handleToggleVerified(place) {
     const newVerified = !place.verified
@@ -182,9 +217,9 @@ function handleDeletePlace(place) {
         current.map((item) =>
           item.id === place.id
             ? {
-                ...item,
-                verified: newVerified,
-              }
+              ...item,
+              verified: newVerified,
+            }
             : item
         )
       )
@@ -336,8 +371,7 @@ function handleDeletePlace(place) {
 
                         <td>
                           <strong>
-                            {place.ratingStars ??
-                              '—'}
+                            {getPlaceRating(place.id)}
                           </strong>
                         </td>
 
@@ -391,11 +425,10 @@ function handleDeletePlace(place) {
 
                             <button
                               type="button"
-                              className={`admin-icon-button verify ${
-                                place.verified
+                              className={`admin-icon-button verify ${place.verified
                                   ? 'verified'
                                   : ''
-                              }`}
+                                }`}
                               onClick={() =>
                                 handleToggleVerified(
                                   place

@@ -17,6 +17,7 @@ import './AdminDashboard.css'
 function AdminDashboard() {
   const [places, setPlaces] = useState([])
   const [reviewCount, setReviewCount] = useState(0)
+  const [reviews, setReviews] = useState([])
   const [pendingSuggestions, setPendingSuggestions] =
     useState(0)
   const [openReports, setOpenReports] = useState(0)
@@ -57,6 +58,12 @@ function AdminDashboard() {
 
         setPlaces(placesData)
         setReviewCount(reviewsSnapshot.size)
+        setReviews(
+          reviewsSnapshot.docs.map(
+            (reviewDocument) =>
+              reviewDocument.data()
+          )
+        )
 
         setPendingSuggestions(
           suggestionsData.filter(
@@ -86,6 +93,27 @@ function AdminDashboard() {
     (place) => place.verified
   ).length
 
+  function getPlaceRating(placeId) {
+    const placeReviews = reviews.filter(
+      (review) =>
+        String(review.placeId) ===
+        String(placeId)
+    )
+
+    if (placeReviews.length === 0) {
+      return '0.0'
+    }
+
+    const total = placeReviews.reduce(
+      (sum, review) =>
+        sum + Number(review.ratingStars || 0),
+      0
+    )
+
+    return (
+      total / placeReviews.length
+    ).toFixed(1)
+  }
   return (
     <main className="admin-page">
       <div className="admin-container">
@@ -299,9 +327,8 @@ function AdminDashboard() {
                       <td>{place.city}</td>
 
                       <td>
-                        {place.ratingStars ?? '—'}
+                        {getPlaceRating(place.id)}
                       </td>
-
                       <td>
                         <span
                           className={

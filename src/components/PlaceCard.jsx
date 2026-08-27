@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   BadgeCheck,
   Heart,
@@ -5,9 +6,13 @@ import {
   Star,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  collection,
+  getDocs,
+} from 'firebase/firestore'
 
 import { useFavorites } from '../context/FavoritesContext'
-import { auth } from '../firebase/firebase'
+import { auth, db } from '../firebase/firebase'
 import { showLoginToast } from '../utils/showLoginToast'
 
 import './PlaceCard.css'
@@ -16,6 +21,9 @@ function PlaceCard({ place }) {
   const navigate = useNavigate()
   const { toggleFavorite, isFavorite } = useFavorites()
 
+  const [reviewsCount, setReviewsCount] = useState(0)
+  const [averageRating, setAverageRating] = useState('0.0')
+
   const favorite = isFavorite(place.id)
 
   const accessibilityCount = Object.values(
@@ -23,6 +31,53 @@ function PlaceCard({ place }) {
   )
     .flat()
     .length
+
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const snapshot = await getDocs(
+          collection(db, 'reviews')
+        )
+
+        const placeReviews = snapshot.docs
+          .map((reviewDocument) =>
+            reviewDocument.data()
+          )
+          .filter(
+            (review) =>
+              String(review.placeId) ===
+              String(place.id)
+          )
+
+        const count = placeReviews.length
+
+        const average =
+          count > 0
+            ? (
+                placeReviews.reduce(
+                  (total, review) =>
+                    total +
+                    Number(review.ratingStars || 0),
+                  0
+                ) / count
+              ).toFixed(1)
+            : '0.0'
+
+        setReviewsCount(count)
+        setAverageRating(average)
+      } catch (error) {
+        console.error(
+          'Error loading place reviews:',
+          error
+        )
+
+        setReviewsCount(0)
+        setAverageRating('0.0')
+      }
+    }
+
+    loadReviews()
+  }, [place.id])
 
   function handleFavoriteClick() {
     if (!auth.currentUser) {
@@ -99,8 +154,8 @@ function PlaceCard({ place }) {
             fill="currentColor"
           />
 
-          <strong>{place.ratingStars}</strong>
-          <span>({place.reviews})</span>
+          <strong>{averageRating}</strong>
+          <span>({reviewsCount})</span>
         </div>
 
         <div className="place-accessibility-summary">
